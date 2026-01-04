@@ -34,17 +34,13 @@ jobs:
         run: bun install
 
       - name: Lint Angular
-        working-directory: frontend
         run: bun run lint
 
       - name: Ejecutar pruebas unitarias
-        working-directory: frontend
         run: bun run test
 
       - name: Build Angular
-        working-directory: frontend
         run: bun run build --configuration production
 
       - name: Test coverage
-        working-directory: frontend
         run: bun run test -- --coverage
