@@ -1,0 +1,76 @@
+<div class="container">
+  <h1>Gestión de Categorías</h1>
+
+  <!-- Formulario para agregar nueva categoría -->
+  <div class="add-section">
+    <h2>Agregar Nueva Categoría</h2>
+    <div class="form-group">
+      <input
+        type="text"
+        [(ngModel)]="newCategoryName"
+        placeholder="Nombre de la categoría"
+        (keyup.enter)="addCategory()"
+        [disabled]="isLoading"
+      />
+      <button (click)="addCategory()" [disabled]="isLoading || !newCategoryName.trim()">
+        {{ isLoading ? 'Guardando...' : 'Agregar' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de categorías -->
+  <div class="list-section">
+    <h2>Lista de Categorías ({{ categories.length }})</h2>
+
+    <div *ngIf="categories.length === 0" class="empty-message">No hay categorías registradas</div>
+
+    <table *ngIf="categories.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let category of categories">
+          <td>{{ category.id }}</td>
+          <td>
+            <!-- Modo de edición -->
+            <span *ngIf="editingCategory?.id === category.id">
+              <input type="text" [(ngModel)]="editingName" (keyup.enter)="updateCategory()" />
+            </span>
+            <!-- Modo normal -->
+            <span *ngIf="editingCategory?.id !== category.id">
+              {{ category.name }}
+            </span>
+          </td>
+          <td>
+            <!-- Botones en modo edición -->
+            <div *ngIf="editingCategory?.id === category.id" class="action-buttons">
+              <button class="btn-save" (click)="updateCategory()" [disabled]="isLoading">
+                Guardar
+              </button>
+              <button class="btn-cancel" (click)="cancelEdit()" [disabled]="isLoading">
+                Cancelar
+              </button>
+            </div>
+            <!-- Botones en modo normal -->
+            <div *ngIf="editingCategory?.id !== category.id" class="action-buttons">
+              <button class="btn-edit" (click)="startEdit(category)" [disabled]="isLoading">
+                Editar
+              </button>
+              <button
+                class="btn-delete"
+                (click)="deleteCategory(category.id)"
+                [disabled]="isLoading"
+              >
+                Eliminar
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
