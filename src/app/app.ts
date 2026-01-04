@@ -16,18 +16,22 @@ import { RouterOutlet, RouterLink } from '@angular/router';
     </nav>
     <router-outlet></router-outlet>
   `,
-  styles: [`
-    a {
-      text-decoration: none;
-      color: #333;
-      padding: 8px 16px;
-      border-radius: 4px;
-    }
-    a:hover { background: #ddd; }
-    a.active {
-      background: #4CAF50;
-      color: white;
-    }
-  `]
+  styles: [
+    `
+      a {
+        text-decoration: none;
+        color: #333;
+        padding: 8px 16px;
+        border-radius: 4px;
+      }
+      a:hover {
+        background: #ddd;
+      }
+      a.active {
+        background: #4caf50;
+        color: white;
+      }
+    `,
+  ],
 })
 export class AppComponent {}
