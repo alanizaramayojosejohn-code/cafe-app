@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit,output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProductService } from '../../services/product/product.service';
@@ -23,6 +23,10 @@ export class ProductListComponent implements OnInit {
   categories$!: Observable<Category[]>;
   selectedCategoryId: string | null = null;
 
+  createProduct = output<void>();
+  editProduct = output<string>();
+  viewDetail = output<string>();
+
   ngOnInit() {
     this.loadProducts();
     this.categories$ = this.categoryService.getCategories();
@@ -42,18 +46,30 @@ export class ProductListComponent implements OnInit {
     this.loadProducts();
   }
 
-  createProduct() {
-    this.router.navigate(['/products/new']);
-  }
+  // onCreateProduct() {
+  //   this.router.navigate(['/products/new']);
+  // }
 
-  editProduct(id: string) {
-    this.router.navigate(['/products/edit', id]);
-  }
+  // inEditProduct(id: string) {
+  //   this.router.navigate(['/products/edit', id]);
+  // }
 
   async deleteProduct(product: Product) {
     if (confirm(`¿Eliminar ${product.name}?`)) {
       await this.productService.deleteProduct(product.id!, product.imagePath, product.recipePath);
     }
+  }
+
+  onCreateProduct() {
+    this.createProduct.emit();
+  }
+
+  onEditProduct(id: string) {
+    this.editProduct.emit(id);
+  }
+
+  onViewDetail(id: string) {
+    this.viewDetail.emit(id);
   }
   // async seedCategoriesOnce() {
   //   await this.categoryService.seedCategories();

@@ -1,113 +1,110 @@
 <div class="min-h-screen bg-black text-white p-6">
   <div class="max-w-5xl mx-auto">
-
     @if (product$ | async; as product) {
 
-      <!-- Header -->
-      <div class="mb-6">
+    <!-- Header -->
+    <div class="mb-6">
+      <button
+        (click)="onGoBack()"
+        class="text-gray-400 hover:text-white mb-4 flex items-center gap-2 transition"
+      >
+        ← Volver
+      </button>
+      <div class="flex justify-between items-start">
+        <div>
+          <h1 class="text-4xl font-bold text-red-600 mb-2">{{ product.name }}</h1>
+          <p class="text-xl text-gray-400">{{ product.pokename }}</p>
+        </div>
+        <span
+          [class.bg-green-600]="product.status === 'activo'"
+          [class.bg-gray-600]="product.status === 'inactivo'"
+          class="px-4 py-2 rounded-lg font-semibold"
+        >
+          {{ product.status }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- Image -->
+      <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+        @if (product.imageUrl) {
+        <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-96 object-cover" />
+        } @else {
+        <div class="w-full h-96 flex items-center justify-center text-gray-600">
+          <span class="text-2xl">Sin imagen</span>
+        </div>
+        }
+      </div>
+
+      <!-- Info -->
+      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 space-y-6">
+        <!-- Price -->
+        <div>
+          <p class="text-gray-400 text-sm mb-1">Precio</p>
+          <p class="text-5xl font-bold text-red-600">${{ product.price }}</p>
+        </div>
+
+        <!-- Type & Category -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-gray-400 text-sm mb-2">Tipo</p>
+            <span class="inline-block bg-gray-800 px-4 py-2 rounded">{{ product.type }}</span>
+          </div>
+          <div>
+            <p class="text-gray-400 text-sm mb-2">Categoría</p>
+            <span class="inline-block bg-gray-800 px-4 py-2 rounded">
+              {{ (category$ | async)?.name || 'N/A' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <p class="text-gray-400 text-sm mb-2">Descripción</p>
+          <p class="text-gray-200">{{ product.description }}</p>
+        </div>
+
+        <!-- Recipe -->
+        @if (product.recipeUrl) {
+        <div>
+          <p class="text-gray-400 text-sm mb-2">Receta</p>
+          <a
+            [href]="product.recipeUrl"
+            target="_blank"
+            class="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition"
+          >
+            📄 Ver Receta
+          </a>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="bg-gray-900 border border-gray-800 rounded-lg p-6">
+      <div class="flex gap-4">
         <button
-          (click)="goBack()"
-          class="text-gray-400 hover:text-white mb-4 flex items-center gap-2 transition">
-          ← Volver
+          (click)="onEditProduct(product.id!)"
+          class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+        >
+          ✏️ Editar Producto
         </button>
-        <div class="flex justify-between items-start">
-          <div>
-            <h1 class="text-4xl font-bold text-red-600 mb-2">{{ product.name }}</h1>
-            <p class="text-xl text-gray-400">{{ product.pokename }}</p>
-          </div>
-          <span
-            [class.bg-green-600]="product.status === 'activo'"
-            [class.bg-gray-600]="product.status === 'inactivo'"
-            class="px-4 py-2 rounded-lg font-semibold">
-            {{ product.status }}
-          </span>
-        </div>
+        <button
+          (click)="deleteProduct(product)"
+          class="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+        >
+          🗑️ Eliminar Producto
+        </button>
       </div>
-
-      <!-- Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-        <!-- Image -->
-        <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-          @if (product.imageUrl) {
-            <img
-              [src]="product.imageUrl"
-              [alt]="product.name"
-              class="w-full h-96 object-cover">
-          } @else {
-            <div class="w-full h-96 flex items-center justify-center text-gray-600">
-              <span class="text-2xl">Sin imagen</span>
-            </div>
-          }
-        </div>
-
-        <!-- Info -->
-        <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 space-y-6">
-
-          <!-- Price -->
-          <div>
-            <p class="text-gray-400 text-sm mb-1">Precio</p>
-            <p class="text-5xl font-bold text-red-600">${{ product.price }}</p>
-          </div>
-
-          <!-- Type & Category -->
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <p class="text-gray-400 text-sm mb-2">Tipo</p>
-              <span class="inline-block bg-gray-800 px-4 py-2 rounded">{{ product.type }}</span>
-            </div>
-            <div>
-              <p class="text-gray-400 text-sm mb-2">Categoría</p>
-              <span class="inline-block bg-gray-800 px-4 py-2 rounded">
-                {{ (category$ | async)?.name || 'N/A' }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <div>
-            <p class="text-gray-400 text-sm mb-2">Descripción</p>
-            <p class="text-gray-200">{{ product.description }}</p>
-          </div>
-
-          <!-- Recipe -->
-          @if (product.recipeUrl) {
-            <div>
-              <p class="text-gray-400 text-sm mb-2">Receta</p>
-              <a
-                [href]="product.recipeUrl"
-                target="_blank"
-                class="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition">
-                📄 Ver Receta
-              </a>
-            </div>
-          }
-
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6">
-        <div class="flex gap-4">
-          <button
-            (click)="editProduct(product.id!)"
-            class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition">
-            ✏️ Editar Producto
-          </button>
-          <button
-            (click)="deleteProduct(product)"
-            class="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition">
-            🗑️ Eliminar Producto
-          </button>
-        </div>
-      </div>
+    </div>
 
     } @else {
-      <!-- Loading State -->
-      <div class="text-center py-20">
-        <p class="text-gray-500 text-xl">Cargando producto...</p>
-      </div>
+    <!-- Loading State -->
+    <div class="text-center py-20">
+      <p class="text-gray-500 text-xl">Cargando producto...</p>
+    </div>
     }
-
   </div>
 </div>

@@ -4,99 +4,105 @@
     <div class="flex justify-between items-center mb-8">
       <h1 class="text-4xl font-bold text-red-600">Productos</h1>
       <button
-        (click)="createProduct()"
-        class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+        (click)="onCreateProduct()"
+        class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+      >
         + Nuevo Producto
       </button>
     </div>
 
     <!-- Filters -->
     @if (categories$ | async; as categories) {
-      <div class="mb-6">
-        <div class="flex gap-2 flex-wrap">
-          <button
-            (click)="filterByCategory(null)"
-            [class.bg-red-600]="selectedCategoryId === null"
-            [class.bg-gray-800]="selectedCategoryId !== null"
-            class="px-4 py-2 rounded-lg hover:bg-red-700 transition">
-            Todos
-          </button>
-          @for (category of categories; track category.id) {
-            <button
-              (click)="filterByCategory(category.id ?? null)"
-              [class.bg-red-600]="selectedCategoryId === category.id"
-              [class.bg-gray-800]="selectedCategoryId !== category.id"
-              class="px-4 py-2 rounded-lg hover:bg-red-700 transition">
-              {{ category.name }}
-            </button>
-          }
-        </div>
+    <div class="mb-6">
+      <div class="flex gap-2 flex-wrap">
+        <button
+          (click)="filterByCategory(null)"
+          [class.bg-red-600]="selectedCategoryId === null"
+          [class.bg-gray-800]="selectedCategoryId !== null"
+          class="px-4 py-2 rounded-lg hover:bg-red-700 transition"
+        >
+          Todos
+        </button>
+        @for (category of categories; track category.id) {
+        <button
+          (click)="filterByCategory(category.id ?? null)"
+          [class.bg-red-600]="selectedCategoryId === category.id"
+          [class.bg-gray-800]="selectedCategoryId !== category.id"
+          class="px-4 py-2 rounded-lg hover:bg-red-700 transition"
+        >
+          {{ category.name }}
+        </button>
+        }
       </div>
+    </div>
     }
 
     <!-- Products Grid -->
-    @if (products$ | async; as products) {
-      @if (products.length > 0) {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          @for (product of products; track product.id) {
-            <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-red-600 transition">
-
-              <!-- Image -->
-              <div class="h-48 bg-gray-800 overflow-hidden">
-                @if (product.imageUrl) {
-                  <img
-                    [src]="product.imageUrl"
-                    [alt]="product.name"
-                    class="w-full h-full object-cover">
-                } @else {
-                  <div class="w-full h-full flex items-center justify-center text-gray-600">
-                    Sin imagen
-                  </div>
-                }
-              </div>
-
-              <!-- Content -->
-              <div class="p-4">
-                <div class="flex justify-between items-start mb-2">
-                  <h3 class="text-xl font-bold text-white">{{ product.name }}</h3>
-                  <span
-                    [class.bg-green-600]="product.status === 'activo'"
-                    [class.bg-gray-600]="product.status === 'inactivo'"
-                    class="text-xs px-2 py-1 rounded">
-                    {{ product.status }}
-                  </span>
-                </div>
-
-                <p class="text-sm text-gray-400 mb-1">{{ product.pokename }}</p>
-                <p class="text-gray-300 text-sm mb-3 line-clamp-2">{{ product.description }}</p>
-
-                <div class="flex justify-between items-center mb-4">
-                  <span class="text-2xl font-bold text-red-600">${{ product.price }}</span>
-                  <span class="text-xs px-2 py-1 bg-gray-800 rounded">{{ product.type }}</span>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex gap-2">
-                  <button
-                    (click)="editProduct(product.id!)"
-                    class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition">
-                    Editar
-                  </button>
-                  <button
-                    (click)="deleteProduct(product)"
-                    class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition">
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            </div>
+    @if (products$ | async; as products) { @if (products.length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      @for (product of products; track product.id) {
+      <div
+        class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-red-600 transition"
+      >
+        <!-- Image -->
+        <div class="h-48 bg-gray-800 overflow-hidden">
+          @if (product.imageUrl) {
+          <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-full object-cover" />
+          } @else {
+          <div class="w-full h-full flex items-center justify-center text-gray-600">Sin imagen</div>
           }
         </div>
-      } @else {
-        <div class="text-center py-20">
-          <p class="text-gray-500 text-xl">No hay productos disponibles</p>
+
+        <!-- Content -->
+        <div class="p-4">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="text-xl font-bold text-white">{{ product.name }}</h3>
+            <span
+              [class.bg-green-600]="product.status === 'activo'"
+              [class.bg-gray-600]="product.status === 'inactivo'"
+              class="text-xs px-2 py-1 rounded"
+            >
+              {{ product.status }}
+            </span>
+          </div>
+
+          <p class="text-sm text-gray-400 mb-1">{{ product.pokename }}</p>
+          <p class="text-gray-300 text-sm mb-3 line-clamp-2">{{ product.description }}</p>
+
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-2xl font-bold text-red-600">${{ product.price }}</span>
+            <span class="text-xs px-2 py-1 bg-gray-800 rounded">{{ product.type }}</span>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2">
+            <button
+              (click)="onEditProduct(product.id!)"
+              class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition"
+            >
+              Editar
+            </button>
+            <button
+              (click)="onViewDetail(product.id!)"
+              class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition"
+            >
+              Ver
+            </button>
+            <button
+              (click)="deleteProduct(product)"
+              class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition"
+            >
+              Eliminar
+            </button>
+          </div>
         </div>
+      </div>
       }
-    }
+    </div>
+    } @else {
+    <div class="text-center py-20">
+      <p class="text-gray-500 text-xl">No hay productos disponibles</p>
+    </div>
+    } }
   </div>
 </div>

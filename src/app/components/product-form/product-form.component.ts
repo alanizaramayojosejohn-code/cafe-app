@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, output, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -35,26 +35,38 @@ export class ProductFormComponent implements OnInit {
 
   productForm!: FormGroup;
   categories$!: Observable<Category[]>;
-  isEditMode = false;
-  productId: string | null = null;
+  // isEditMode = false;
+  // productId: string | null = null;
   imageFile: File | null = null;
   recipeFile: File | null = null;
   currentProduct: Product | null = null;
 
+  productId = input<string | null>(null);
+  isEditMode = input<boolean>(false);
+
+  cancel = output<void>();
+  saved = output<void>();
   productTypes: ProductType[] = ['comestible', 'nocomestible'];
   productStatuses: ProductStatus[] = ['activo', 'inactivo'];
 
+  // ngOnInit() {
+  //   this.categories$ = this.categoryService.getCategories();
+  //   this.initForm();
+
+  //   this.productId = this.route.snapshot.paramMap.get('id');
+  //   if (this.productId) {
+  //     this.isEditMode = true;
+  //     this.loadProduct(this.productId);
+  //   }
+  // }
   ngOnInit() {
     this.categories$ = this.categoryService.getCategories();
     this.initForm();
 
-    this.productId = this.route.snapshot.paramMap.get('id');
-    if (this.productId) {
-      this.isEditMode = true;
-      this.loadProduct(this.productId);
+    if (this.productId()) {
+      this.loadProduct(this.productId()!);
     }
   }
-
   initForm() {
     this.productForm = this.fb.group({
       pokename: ['', Validators.required],
@@ -91,13 +103,37 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
+  // async onSubmit() {
+  //   if (this.productForm.invalid) return;
+
+  //   try {
+  //     if (this.isEditMode && this.productId) {
+  //       await this.productService.updateProduct(
+  //         this.productId,
+  //         this.productForm.value,
+  //         this.imageFile || undefined,
+  //         this.recipeFile || undefined
+  //       );
+  //     } else {
+  //       await this.productService.addProduct(
+  //         this.productForm.value,
+  //         this.imageFile || undefined,
+  //         this.recipeFile || undefined
+  //       );
+  //     }
+  //     this.router.navigate(['/products']);
+  //   } catch (error) {
+  //     console.error('Error al guardar producto:', error);
+  //   }
+  // }
+
   async onSubmit() {
     if (this.productForm.invalid) return;
 
     try {
-      if (this.isEditMode && this.productId) {
+      if (this.isEditMode() && this.productId()) {
         await this.productService.updateProduct(
-          this.productId,
+          this.productId()!,
           this.productForm.value,
           this.imageFile || undefined,
           this.recipeFile || undefined
@@ -109,13 +145,17 @@ export class ProductFormComponent implements OnInit {
           this.recipeFile || undefined
         );
       }
-      this.router.navigate(['/products']);
+      this.saved.emit();
     } catch (error) {
       console.error('Error al guardar producto:', error);
     }
   }
 
-  cancel() {
-    this.router.navigate(['/products']);
+  // onCancel() {
+  //   this.router.navigate(['/products']);
+  // }
+
+  onCancel() {
+    this.cancel.emit();
   }
 }
