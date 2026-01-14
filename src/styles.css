@@ -5,9 +5,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 /* Estilos globales */
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }

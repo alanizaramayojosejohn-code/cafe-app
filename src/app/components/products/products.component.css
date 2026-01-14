@@ -1,0 +1,95 @@
+/* Estilos personalizados para Material */
+::ng-deep .mat-mdc-form-field {
+  width: 100%;
+}
+
+::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: #fafafa;
+  border-radius: 8px;
+}
+
+::ng-deep .mat-mdc-card {
+  border-radius: 16px !important;
+}
+
+::ng-deep .mdc-button {
+  text-transform: none !important;
+}
+
+/* Animación de slide down para el formulario */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Truncar texto con ellipsis */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Hover effect para las cards */
+::ng-deep .mat-mdc-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Estilos para los snackbars */
+::ng-deep .snackbar-success {
+  background-color: #10b981 !important;
+  color: white !important;
+}
+
+::ng-deep .snackbar-error {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+::ng-deep .snackbar-warning {
+  background-color: #f59e0b !important;
+  color: white !important;
+}
+
+::ng-deep .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  border-radius: 8px !important;
+}
+
+/* Spinner dentro de botones */
+::ng-deep mat-spinner circle {
+  stroke: white;
+}
+
+/* Material chips personalizados */
+::ng-deep .mat-mdc-chip {
+  border-radius: 12px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  ::ng-deep .mat-toolbar {
+    padding: 0 !important;
+  }
+}
+
+/* Transiciones suaves */
+* {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}

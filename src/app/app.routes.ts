@@ -1,17 +1,40 @@
+import { SignUpComponent } from './pages/auth/sign-up/sign-up.component';
 import { Routes } from '@angular/router';
 
+import { LogInComponent } from './pages/auth/log-in/log-in.component';
+import { authGuard, noAuthGuard } from './guards/auth-guard';
+import { ProductListComponent } from './components/product-list/product-list.component';
+import { ProductFormComponent } from './components/product-form/product-form.component';
+import { ProductDetailComponent } from './components/product-detail/product-detail.component';
 export const routes: Routes = [
-  { path: '', redirectTo: '/categories-realtime', pathMatch: 'full' },
   {
-    path: 'categories-realtime',
+    path: '',
     loadComponent: () =>
-      import('./components/categories/categories').then((m) => m.CategoriesComponent),
+      import('./pages/auth/sign-up/sign-up.component').then((m) => m.SignUpComponent),
   },
   {
-    path: 'categories-firestore',
-    loadComponent: () =>
-      import('./components/categories-firestore/categories-firestore').then(
-        (m) => m.CategoriesFirestoreComponent
-      ),
+    path: 'auth',
+    children: [
+      {
+        path: 'log-in',
+        component: LogInComponent,
+        canActivate: [noAuthGuard], // Previene acceso si ya está autenticado
+      },
+      {
+        path: 'sign-up',
+        component: SignUpComponent,
+        canActivate: [noAuthGuard], // Previene acceso si ya está autenticado
+      },
+    ],
   },
+
+  {
+    path: 'home',
+    loadComponent: () => import('./pages/home/home.component').then((m) => m.Home),
+    canActivate: [authGuard],
+  },
+  { path: 'products', component: ProductListComponent },
+  { path: 'products/new', component: ProductFormComponent },
+  { path: 'products/edit/:id', component: ProductFormComponent },
+  { path: 'products/:id', component: ProductDetailComponent }
 ];

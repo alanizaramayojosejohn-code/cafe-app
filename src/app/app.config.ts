@@ -1,26 +1,25 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { routes } from './app.routes';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideDatabase, getDatabase } from '@angular/fire/database';
-import { provideFirestore, getFirestore } from '@angular/fire/firestore'; // ← AGREGAR
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
-const firebaseConfig = {
-  apiKey: 'AIzaSyDoTD2PCqvCWUNKeiFr5RB-gmRf2CMwTnM',
-  authDomain: 'cafe-app-776ee.firebaseapp.com',
-  databaseURL: 'https://cafe-app-776ee-default-rtdb.firebaseio.com',
-  projectId: 'cafe-app-776ee',
-  storageBucket: 'cafe-app-776ee.firebasestorage.app',
-  messagingSenderId: '601659291354',
-  appId: '1:601659291354:web:56284432271c51b5d957e3',
-  measurementId: 'G-8KY70GT8HY',
-};
+// Firebase (AngularFire modular)
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
+import { provideStorage, getStorage } from '@angular/fire/storage';
+
+import { routes } from './app.routes';
+import { environment } from '../environments/environment';
+
 export const appConfig: ApplicationConfig = {
   providers: [
-    // provideZoneChangeDetection({ eventCoalescing: true }), ← COMENTAR ESTA LÍNEA
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideFirebaseApp(() => initializeApp(firebaseConfig)),
-    provideDatabase(() => getDatabase()),
-    provideFirestore(() => getFirestore())
+    provideAnimationsAsync(),
+
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideAuth(() => getAuth()),
+    provideFirestore(() => getFirestore()),
+    provideStorage(() => getStorage()),
   ],
 };
