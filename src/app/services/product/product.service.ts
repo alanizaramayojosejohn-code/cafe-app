@@ -21,13 +21,14 @@ export class ProductService {
     return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
   }
 
-  async addProduct(product: Omit<Product, 'createdAt' | 'updatedAt' | 'imageUrl' | 'imagePath' | 'recipeUrl' | 'recipePath'>, imageFile?: File, recipeFile?: File) {
+  async addProduct(product: Omit<Product, 'createdAt' | 'updatedAt' | 'imageUrl' | 'imagePath'
+
+    | 'recipeUrl' | 'recipePath'>, imageFile?: File, recipeFile?: File) {
     let imageUrl = '';
     let imagePath = '';
     let recipeUrl = '';
     let recipePath = '';
 
-    // Subir imagen
     if (imageFile) {
       imagePath = `products/${Date.now()}_${imageFile.name}`;
       const imageRef = ref(this.storage, imagePath);
@@ -35,7 +36,6 @@ export class ProductService {
       imageUrl = await getDownloadURL(imageRef);
     }
 
-    // Subir receta
     if (recipeFile) {
       recipePath = `recipes/${Date.now()}_${recipeFile.name}`;
       const recipeRef = ref(this.storage, recipePath);
@@ -54,7 +54,6 @@ export class ProductService {
     });
 
   }
-// Agregar a ProductService
  getProductById(id: string): Observable<Product | undefined> {
   const productDoc = doc(this.firestore, 'products', id);
   return docData(productDoc, { idField: 'id' }) as Observable<Product | undefined>;
@@ -63,9 +62,7 @@ export class ProductService {
     const productDoc = doc(this.firestore, 'products', id);
     const updates: any = { ...product, updatedAt: serverTimestamp() };
 
-    // Actualizar imagen
     if (imageFile) {
-      // Eliminar imagen anterior si existe
       if (product.imagePath) {
         const oldImageRef = ref(this.storage, product.imagePath);
         await deleteObject(oldImageRef).catch(() => {});
@@ -77,9 +74,7 @@ export class ProductService {
       updates.imageUrl = await getDownloadURL(imageRef);
     }
 
-    // Actualizar receta
     if (recipeFile) {
-      // Eliminar receta anterior si existe
       if (product.recipePath) {
         const oldRecipeRef = ref(this.storage, product.recipePath);
         await deleteObject(oldRecipeRef).catch(() => {});
@@ -95,7 +90,6 @@ export class ProductService {
   }
 
   async deleteProduct(id: string, imagePath?: string, recipePath?: string) {
-    // Eliminar archivos de Storage
     if (imagePath) {
       const imageRef = ref(this.storage, imagePath);
       await deleteObject(imageRef).catch(() => {});
@@ -106,7 +100,6 @@ export class ProductService {
       await deleteObject(recipeRef).catch(() => {});
     }
 
-    // Eliminar documento
     const productDoc = doc(this.firestore, 'products', id);
     return deleteDoc(productDoc);
   }

@@ -73,6 +73,6 @@ export class ProductListComponent implements OnInit {
   }
   // async seedCategoriesOnce() {
   //   await this.categoryService.seedCategories();
-  //   console.log('✅ Categorías cargadas');
+  //   console.log(' Categorías cargadas');
   // }
 }

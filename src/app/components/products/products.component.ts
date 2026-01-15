@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { ProductListComponent } from '../product-list/product-list.component';
 import { ProductFormComponent } from '../product-form/product-form.component';
 import { ProductDetailComponent } from '../product-detail/product-detail.component';
+import { NavbarComponent } from '../nav-bar/nav-bar';
 
 type View = 'list' | 'form' | 'detail';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, ProductListComponent, ProductFormComponent, ProductDetailComponent],
+  imports: [CommonModule, ProductListComponent, ProductFormComponent, NavbarComponent, ProductDetailComponent],
   templateUrl: './products.component.html',
   styleUrl: './products.component.css',
 })

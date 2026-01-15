@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-black text-white p-6">
+<div class="min-h-screen bg-white text-white p-6">
   <div class="max-w-5xl mx-auto">
     @if (product$ | async; as product) {
 
@@ -6,7 +6,7 @@
     <div class="mb-6">
       <button
         (click)="onGoBack()"
-        class="text-gray-400 hover:text-white mb-4 flex items-center gap-2 transition"
+        class="w-20 h-10 text-white bg-slate-600 rounded-2xl border-none hover:text-black hover:bg-slate-400 mb-4 flex items-center gap-2 transition"
       >
         ← Volver
       </button>
@@ -28,7 +28,7 @@
     <!-- Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <!-- Image -->
-      <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+      <div class="bg-gray-50 border border-gray-800 rounded-lg overflow-hidden">
         @if (product.imageUrl) {
         <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-96 object-cover" />
         } @else {
@@ -39,7 +39,9 @@
       </div>
 
       <!-- Info -->
-      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 space-y-6">
+      <div
+        class="bg-gray-100 shadow-sm shadow-black border border-gray-800 rounded-lg p-6 space-y-6"
+      >
         <!-- Price -->
         <div>
           <p class="text-gray-400 text-sm mb-1">Precio</p>
@@ -83,7 +85,7 @@
     </div>
 
     <!-- Actions -->
-    <div class="bg-gray-900 border border-gray-800 rounded-lg p-6">
+    <div class="bg-gray-100 shadow-sm shadow-black border border-gray-800 rounded-lg p-6">
       <div class="flex gap-4">
         <button
           (click)="onEditProduct(product.id!)"

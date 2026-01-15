@@ -69,10 +69,10 @@ export class ProductFormComponent implements OnInit {
   }
   initForm() {
     this.productForm = this.fb.group({
-      pokename: ['', Validators.required],
-      name: ['', Validators.required],
+      pokename: ['', Validators.required, Validators.minLength(3)],
+      name: ['', Validators.required, Validators.minLength(3), Validators.maxLength(15)],
       description: ['', Validators.required],
-      price: [0, [Validators.required, Validators.min(0)]],
+      price: [0, [Validators.required, Validators.min(1)]],
       type: ['comestible', Validators.required],
       status: ['activo', Validators.required],
       categoryId: ['', Validators.required],
