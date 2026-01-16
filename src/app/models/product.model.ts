@@ -1,4 +1,4 @@
-import { Timestamp } from "@angular/fire/firestore";
+import { Timestamp } from '@angular/fire/firestore';
 
 export type ProductType = 'comestible' | 'nocomestible';
 export type ProductStatus = 'activo' | 'inactivo';
