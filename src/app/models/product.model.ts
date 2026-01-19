@@ -4,7 +4,7 @@ export type ProductType = 'comestible' | 'nocomestible';
 export type ProductStatus = 'activo' | 'inactivo';
 
 export interface Product {
-  id?: string;
+  id: string;
   pokename: string;
   name: string;
   description: string;
