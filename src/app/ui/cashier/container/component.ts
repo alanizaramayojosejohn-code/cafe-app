@@ -3,9 +3,9 @@ import { RouterOutlet } from '@angular/router'
 import { NavbarComponent } from '../components/nav-bar/nav-bar'
 
 @Component({
-   selector: 'x-admin',
+   selector: 'x-cashier',
    templateUrl: './component.html',
    imports: [RouterOutlet, NavbarComponent],
    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class AdminComponent {}
+export default class CashierComponent {}

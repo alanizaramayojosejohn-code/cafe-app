@@ -23,7 +23,6 @@ export const authGuard: CanActivateFn = (route, state) => {
    )
 }
 
-// Guard para prevenir acceso a login/register si ya está autenticado
 export const noAuthGuard: CanActivateFn = (route, state) => {
    const authService = inject(AuthService)
    const router = inject(Router)
@@ -34,7 +33,7 @@ export const noAuthGuard: CanActivateFn = (route, state) => {
          if (!user) {
             return true
          } else {
-            router.navigate(['/home'])
+            router.navigate(['/admin'])
             return false
          }
       })
