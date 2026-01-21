@@ -1,6 +1,5 @@
 import { Component, inject, OnInit, output } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { Router } from '@angular/router'
 import { ProductService } from '../../../../../../services/product/product.service'
 import { CategoryService } from '../../../../../../services/category/category.service'
 import { Product } from '../../../../../../models/product.model'
@@ -9,7 +8,6 @@ import { Observable } from 'rxjs'
 
 @Component({
    selector: 'app-product-list',
-   standalone: true,
    imports: [CommonModule],
    templateUrl: './product-list.component.html',
    styleUrl: './product-list.component.css',
@@ -17,7 +15,6 @@ import { Observable } from 'rxjs'
 export class ProductListComponent implements OnInit {
    private productService = inject(ProductService)
    private categoryService = inject(CategoryService)
-   private router = inject(Router)
 
    products$!: Observable<Product[]>
    categories$!: Observable<Category[]>
@@ -62,8 +59,4 @@ export class ProductListComponent implements OnInit {
    onViewDetail(id: string) {
       this.viewDetail.emit(id)
    }
-   // async seedCategoriesOnce() {
-   //   await this.categoryService.seedCategories();
-   //   console.log(' Categorías cargadas');
-   // }
 }

@@ -1,21 +1,53 @@
-import { Injectable, inject } from '@angular/core';
-import { Storage, ref, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Injectable, inject } from '@angular/core'
+import { Storage, ref, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage'
 
-@Injectable({ providedIn: 'root' })
+export interface UploadResult {
+  url: string
+  path: string
+}
+
+@Injectable({
+  providedIn: 'root',
+})
 export class StorageService {
-  private storage = inject(Storage);
+  private storage = inject(Storage)
 
-  async uploadFile(file: File, path: string): Promise<string> {
-    const storageRef = ref(this.storage, `${path}/${Date.now()}_${file.name}`);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
+  async uploadFile(path: string, file: File): Promise<UploadResult> {
+    try {
+      const fileRef = ref(this.storage, path)
+      await uploadBytes(fileRef, file)
+      const url = await getDownloadURL(fileRef)
+
+      return { url, path }
+    } catch (error) {
+      console.error('Error al subir archivo:', error)
+      throw new Error('Error al subir el archivo. Por favor, intente nuevamente.')
+    }
   }
 
-  async deleteFileByUrl(url: string) {
-    if (!url) return;
+  async deleteFile(path: string): Promise<void> {
+    if (!path) {
+      return
+    }
+
     try {
-      const fileRef = ref(this.storage, url);
-      await deleteObject(fileRef);
-    } catch (e) { console.error('Error eliminando archivo', e); }
+      const fileRef = ref(this.storage, path)
+      await deleteObject(fileRef)
+    } catch (error) {
+      if ((error as any)?.code !== 'storage/object-not-found') {
+        console.error('Error al eliminar archivo:', error)
+      }
+    }
+  }
+
+  async deleteFiles(paths: string[]): Promise<void> {
+    const deletePromises = paths.filter(Boolean).map((path) => this.deleteFile(path))
+    await Promise.allSettled(deletePromises)
+  }
+
+  generatePath(folder: string, fileName: string): string {
+    const timestamp = Date.now()
+    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
+    return `${folder}/${timestamp}_${sanitizedFileName}`
   }
 }

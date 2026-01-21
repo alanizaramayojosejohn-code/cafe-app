@@ -54,7 +54,7 @@ onGoBack() {
   async deleteProduct(product: Product) {
     if (confirm(`¿Eliminar ${product.name}?`)) {
       await this.productService.deleteProduct(product.id!, product.imagePath, product.recipePath);
-      this.router.navigate(['/products']);
+      this.router.navigate(['/admin/products']);
     }
   }
 }

@@ -8,7 +8,6 @@ type View = 'list' | 'form' | 'detail'
 
 @Component({
    selector: 'app-products',
-   standalone: true,
    imports: [CommonModule, ProductListComponent, ProductFormComponent, ProductDetailComponent],
    templateUrl: './products.component.html',
    styleUrl: './products.component.css',
