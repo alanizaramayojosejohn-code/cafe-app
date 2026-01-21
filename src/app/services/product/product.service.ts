@@ -1,166 +1,160 @@
 import { Injectable, inject } from '@angular/core'
-import {
-   Firestore,
-   collection,
-   collectionData,
-   doc,
-   addDoc,
-   updateDoc,
-   deleteDoc,
-   serverTimestamp,
-   query,
-   where,
-} from '@angular/fire/firestore'
-import { Storage, ref, uploadBytes, getDownloadURL, deleteObject } from '@angular/fire/storage'
-import { Observable } from 'rxjs'
-import { Product } from '../../models/product.model'
-import { docData } from '@angular/fire/firestore'
-import imageCompression from 'browser-image-compression'
-import { __param } from 'tslib'
+import { Observable, from } from 'rxjs'
+import { uuidv7 } from 'uuidv7'
+import { Product, ProductCreate, FileUploadData } from '../../models/product.model'
+import { ProductRepositoryService } from './product-repository.service'
+import { StorageService } from '../storage/storage.service'
+import { FileValidationService } from './validation.service'
+import { ImageCompressionService } from './compression.service'
 
 @Injectable({
    providedIn: 'root',
 })
 export class ProductService {
-   private firestore = inject(Firestore)
-   private storage = inject(Storage)
-   private productsCollection = collection(this.firestore, 'products')
-
-   private readonly ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-   private readonly ALLOWED_RECIPE_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
-   private readonly MAX_FILE_SIZE = 5 * 1024 * 1024
+   private repository = inject(ProductRepositoryService)
+   private storageService = inject(StorageService)
+   private fileValidator = inject(FileValidationService)
+   private imageCompressor = inject(ImageCompressionService)
 
    getProducts(): Observable<Product[]> {
-      return collectionData(this.productsCollection, { idField: 'id' }) as Observable<Product[]>
+      return this.repository.getAll()
+   }
+
+   getProductById(id: string): Observable<Product | undefined> {
+      return this.repository.getById(id)
    }
 
    getProductsByCategory(categoryId: string): Observable<Product[]> {
-      const q = query(this.productsCollection, where('categoryId', '==', categoryId))
-      return collectionData(q, { idField: 'id' }) as Observable<Product[]>
+      return this.repository.getByCategory(categoryId)
    }
 
-   private async validateAndCompressImage(file: File): Promise<File> {
-      if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-         throw new Error(`Formato de imagem no válido. Solo se permiten: JPEG,PNG, WebP. Recibido: ${file.type}`)
-      }
-      if (file.size > this.MAX_FILE_SIZE) {
-         throw new Error(
-            `La imagen es demasiado grande. Tamaño máximo: 5MB. Tamaño atual: ${(file.size / 1024 / 1024).toFixed(2)}MB`
-         )
-      }
+   checkPokenameExist$(pokename: string, excludeId?: string): Observable<boolean> {
+      return from(this.repository.existsByPokename(pokename, excludeId))
+   }
+
+   async addProduct(product: ProductCreate, imageFile?: File, recipeFile?: File): Promise<string> {
       try {
-         const compressedFile = await imageCompression(file, {
-            maxSizeMB: 1,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
-            fileType: file.type,
+         const productId = this.generateId()
+         const normalizedPokename = product.pokename.trim().toLowerCase()
+
+         const exists = await this.repository.existsByPokename(normalizedPokename)
+         if (exists) {
+            throw new Error(`El pokename "${product.pokename}" ya está en uso`)
+         }
+
+         const [imageData, recipeData] = await Promise.all([
+            this.processImageUpload(imageFile),
+            this.processRecipeUpload(recipeFile),
+         ])
+
+         await this.repository.create(productId, {
+            ...product,
+            pokename: normalizedPokename,
+            ...imageData,
+            ...recipeData,
          })
-         return compressedFile
+
+         return productId
       } catch (error) {
-         throw new Error('Error al procesar la imagen')
+         console.error('Error al crear producto:', error)
+         throw error
       }
    }
 
-   private validateRecipeFile(file: File): void {
-      if (!this.ALLOWED_RECIPE_TYPES.includes(file.type)) {
-         throw new Error(`Formato de receta no válido. Solo se permiten: PDF, JPEG, PNG, WEBP. Recibido: ${file.type}`)
-      }
-      if (file.size > this.MAX_FILE_SIZE) {
-         throw new Error(
-            `El archivo de receta es demasiado grande. Tamaño máximo permitido 5MB.
-         Tamaño actual:${(file.size / 1024 / 1024).toFixed(2)}MB`
-         )
-      }
-   }
+   async updateProduct(id: string, product: Partial<Product>, imageFile?: File, recipeFile?: File): Promise<void> {
+      try {
+         let updates: Partial<Product> = { ...product }
 
-   async addProduct(
-      product: Omit<Product, 'createdAt' | 'updatedAt' | 'imageUrl' | 'imagePath' | 'recipeUrl' | 'recipePath'>,
-      imageFile?: File,
-      recipeFile?: File
-   ) {
-      let imageUrl = ''
-      let imagePath = ''
-      let recipeUrl = ''
-      let recipePath = ''
-
-      if (imageFile) {
-         const validatedImage = await this.validateAndCompressImage(imageFile)
-
-         imagePath = `products/${Date.now()}_${imageFile.name}`
-         const imageRef = ref(this.storage, imagePath)
-         await uploadBytes(imageRef, validatedImage)
-         imageUrl = await getDownloadURL(imageRef)
-      }
-
-      if (recipeFile) {
-         this.validateRecipeFile(recipeFile)
-         recipePath = `recipes/${Date.now()}_${recipeFile.name}`
-         const recipeRef = ref(this.storage, recipePath)
-         await uploadBytes(recipeRef, recipeFile)
-         recipeUrl = await getDownloadURL(recipeRef)
-      }
-
-      return addDoc(this.productsCollection, {
-         ...product,
-         imageUrl,
-         imagePath,
-         recipeUrl,
-         recipePath,
-         createdAt: serverTimestamp(),
-         updatedAt: serverTimestamp(),
-      })
-   }
-   getProductById(id: string): Observable<Product | undefined> {
-      const productDoc = doc(this.firestore, 'products', id)
-      return docData(productDoc, { idField: 'id' }) as Observable<Product | undefined>
-   }
-
-   async updateProduct(id: string, product: Partial<Product>, imageFile?: File, recipeFile?: File) {
-      const productDoc = doc(this.firestore, 'products', id)
-      const updates: any = { ...product, updatedAt: serverTimestamp() }
-
-      if (imageFile) {
-         const validatedImage = await this.validateAndCompressImage(imageFile)
-
-         if (product.imagePath) {
-            const oldImageRef = ref(this.storage, product.imagePath)
-            await deleteObject(oldImageRef).catch(() => {})
+         if (product.pokename) {
+            const normalizedPokename = product.pokename.trim().toLowerCase()
+            const exists = await this.repository.existsByPokename(normalizedPokename, id)
+            if (exists) {
+               throw new Error(`El pokename "${product.pokename}" ya está en uso`)
+            }
+            updates.pokename = normalizedPokename
          }
 
-         updates.imagePath = `products/${Date.now()}_${imageFile.name}`
-         const imageRef = ref(this.storage, updates.imagePath)
-         await uploadBytes(imageRef, validatedImage)
-         updates.imageUrl = await getDownloadURL(imageRef)
-      }
+         if (imageFile) {
+            const imageData = await this.processImageUpload(imageFile)
+            updates = { ...updates, ...imageData }
 
-      if (recipeFile) {
-         this.validateRecipeFile(recipeFile)
-         if (product.recipePath) {
-            const oldRecipeRef = ref(this.storage, product.recipePath)
-            await deleteObject(oldRecipeRef).catch(() => {})
+            if (product.imagePath) {
+               await this.storageService.deleteFile(product.imagePath)
+            }
          }
 
-         updates.recipePath = `recipes/${Date.now()}_${recipeFile.name}`
-         const recipeRef = ref(this.storage, updates.recipePath)
-         await uploadBytes(recipeRef, recipeFile)
-         updates.recipeUrl = await getDownloadURL(recipeRef)
-      }
+         if (recipeFile) {
+            const recipeData = await this.processRecipeUpload(recipeFile)
+            updates = { ...updates, ...recipeData }
 
-      return updateDoc(productDoc, updates)
+            if (product.recipePath) {
+               await this.storageService.deleteFile(product.recipePath)
+            }
+         }
+
+         await this.repository.update(id, updates)
+      } catch (error) {
+         console.error('Error al actualizar producto:', error)
+         throw error
+      }
    }
 
-   async deleteProduct(id: string, imagePath?: string, recipePath?: string) {
-      if (imagePath) {
-         const imageRef = ref(this.storage, imagePath)
-         await deleteObject(imageRef).catch(() => {})
+   async deleteProduct(id: string, imagePath?: string, recipePath?: string): Promise<void> {
+      try {
+         await this.storageService.deleteFiles([imagePath, recipePath].filter(Boolean) as string[])
+
+         await this.repository.delete(id)
+      } catch (error) {
+         console.error('Error al eliminar producto:', error)
+         throw new Error('Erro al eliminar el producto. Por favor, intente nuevamente.')
+      }
+   }
+
+   private generateId(): string {
+      return uuidv7()
+   }
+
+   private async processImageUpload(file?: File): Promise<FileUploadData> {
+      if (!file) {
+         return {}
       }
 
-      if (recipePath) {
-         const recipeRef = ref(this.storage, recipePath)
-         await deleteObject(recipeRef).catch(() => {})
+      try {
+         this.fileValidator.validateImage(file)
+
+         const compressedImage = await this.imageCompressor.compress(file)
+
+         const path = this.storageService.generatePath('products', file.name)
+         const { url } = await this.storageService.uploadFile(path, compressedImage)
+
+         return {
+            imageUrl: url,
+            imagePath: path,
+         }
+      } catch (error) {
+         console.error('Error al procesar imagen:', error)
+         throw error
+      }
+   }
+
+   private async processRecipeUpload(file?: File): Promise<FileUploadData> {
+      if (!file) {
+         return {}
       }
 
-      const productDoc = doc(this.firestore, 'products', id)
-      return deleteDoc(productDoc)
+      try {
+         this.fileValidator.validateRecipe(file)
+
+         const path = this.storageService.generatePath('recipes', file.name)
+         const { url } = await this.storageService.uploadFile(path, file)
+
+         return {
+            recipeUrl: url,
+            recipePath: path,
+         }
+      } catch (error) {
+         console.error('Error al procesar receta:', error)
+         throw error
+      }
    }
 }

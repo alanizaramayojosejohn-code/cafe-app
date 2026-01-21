@@ -124,7 +124,7 @@ export default class SignUpComponent {
 
       try {
          await this.authService.loginWithGoogle()
-         this.router.navigate(['/home'])
+         this.router.navigate(['/admin/home'])
       } catch (error: any) {
          this.errorMessage.set(error)
       } finally {
