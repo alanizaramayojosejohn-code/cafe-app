@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, output } from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { AsyncPipe, CommonModule } from '@angular/common'
 import { ProductService } from '../../../../../../services/product/product.service'
 import { CategoryService } from '../../../../../../services/category/category.service'
 import { Product } from '../../../../../../models/product.model'
@@ -8,7 +8,7 @@ import { Observable } from 'rxjs'
 
 @Component({
    selector: 'app-product-list',
-   imports: [CommonModule],
+   imports: [AsyncPipe],
    templateUrl: './product-list.component.html',
    styleUrl: './product-list.component.css',
 })

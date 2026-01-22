@@ -7,9 +7,7 @@ import { StorageService } from '../storage/storage.service'
 import { FileValidationService } from './validation.service'
 import { ImageCompressionService } from './compression.service'
 
-@Injectable({
-   providedIn: 'root',
-})
+@Injectable()
 export class ProductService {
    private repository = inject(ProductRepositoryService)
    private storageService = inject(StorageService)
