@@ -13,3 +13,4 @@ export const DEFAULT_FILE_VALIDATION_CONFIG: FileValidationConfig = {
    allowedRecipeTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
    maxFileSize: 5 * 1024 * 1024,
 }
+

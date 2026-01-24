@@ -11,6 +11,7 @@ import { Observable } from 'rxjs'
    imports: [CommonModule],
    templateUrl: './product-list.component.html',
    styleUrl: './product-list.component.css',
+   
 })
 export class ProductListComponent implements OnInit {
    private productService = inject(ProductService)
