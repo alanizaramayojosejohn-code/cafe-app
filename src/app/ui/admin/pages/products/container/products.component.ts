@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common'
 import { ProductListComponent } from '../components/product-list/product-list.component'
 import { ProductFormComponent } from '../components/product-form/product-form.component'
 import { ProductDetailComponent } from '../components/product-detail/product-detail.component'
+import { ProductService } from '../../../../../services/product/product.service'
+import { CategoryService } from '../../../../../services/category/category.service'
 
 type View = 'list' | 'form' | 'detail'
 
 @Component({
    selector: 'app-products',
    imports: [CommonModule, ProductListComponent, ProductFormComponent, ProductDetailComponent],
+   providers: [ProductService, CategoryService],
    templateUrl: './products.component.html',
    styleUrl: './products.component.css',
 })
