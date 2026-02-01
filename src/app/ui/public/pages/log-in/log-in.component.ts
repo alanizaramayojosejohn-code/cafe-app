@@ -8,7 +8,8 @@ import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 import { MatDividerModule } from '@angular/material/divider'
-import { AuthService } from '../../../../services/auth.service'
+import { AuthService } from '../../../../services/auth/auth.service'
+import { UserService } from '../../../../services/user/user.service'
 
 @Component({
    selector: 'app-log-in',
@@ -22,6 +23,7 @@ import { AuthService } from '../../../../services/auth.service'
       MatProgressSpinnerModule,
       MatDividerModule,
    ],
+   providers: [UserService],
    templateUrl: './log-in.component.html',
    // styleUrls: ['./log-in.component.css']
 })

@@ -1,10 +1,10 @@
 import { Timestamp } from '@angular/fire/firestore';
 export interface Category {
-  id?: string; // ID del documento en Firestore
-  name: string; // Nombre de la categoría
-  order: number; // Orden de visualización
-  createdAt?: Timestamp; // Fecha de creación
-  updatedAt?: Date; // Fecha de actualización
+  id?: string;
+  name: string;
+  order: number;
+  createdAt?: Timestamp;
+  updatedAt?: Date;
 }
 
 export const CATEGORIES_SEED: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>[] = [

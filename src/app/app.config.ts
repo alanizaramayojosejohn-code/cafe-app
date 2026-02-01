@@ -2,7 +2,7 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core'
 import { provideRouter } from '@angular/router'
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async'
 
-import { FILE_VALIDATION_CONFIG, DEFAULT_FILE_VALIDATION_CONFIG } from './services/product/file-validation'
+import { FILE_VALIDATION_CONFIG, DEFAULT_FILE_VALIDATION_CONFIG } from './models/interface.config'
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app'
 import { provideAuth, getAuth } from '@angular/fire/auth'
 import { provideFirestore, getFirestore } from '@angular/fire/firestore'

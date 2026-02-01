@@ -17,9 +17,7 @@ import {
 import { Observable } from 'rxjs'
 import { Product, ProductUpdate } from '../../models/product.model'
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class ProductRepositoryService {
   private firestore = inject(Firestore)
   private productsCollection = collection(this.firestore, 'products')

@@ -1,9 +1,7 @@
 import { Injectable, inject } from '@angular/core'
-import { FILE_VALIDATION_CONFIG, FileValidationConfig } from './file-validation'
+import { FILE_VALIDATION_CONFIG, FileValidationConfig } from './../../models/interface.config'
 
-@Injectable({
-   providedIn: 'root',
-})
+@Injectable()
 export class FileValidationService {
    private config = inject(FILE_VALIDATION_CONFIG)
 

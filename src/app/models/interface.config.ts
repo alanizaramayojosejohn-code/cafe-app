@@ -1,3 +1,14 @@
+export interface CompressionOptions {
+   maxSizeMB?: number
+   maxWidthOrHeight?: number
+   useWebWorker?: boolean
+}
+
+export interface UploadResult {
+   url: string
+   path: string
+}
+
 import { InjectionToken } from '@angular/core'
 
 export interface FileValidationConfig {

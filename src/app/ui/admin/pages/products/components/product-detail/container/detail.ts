@@ -1,17 +1,21 @@
 import { Component, inject, OnInit, input, output } from '@angular/core'
-import { AsyncPipe, CommonModule } from '@angular/common'
+import { AsyncPipe } from '@angular/common'
 import { ActivatedRoute, Router } from '@angular/router'
-import { ProductService } from '../../../../../../services/product/product.service'
-import { CategoryService } from '../../../../../../services/category/category.service'
-import { Product } from '../../../../../../models/product.model'
-import { Category } from '../../../../../../models/category.model'
+import { ProductService } from '../../../../../../../services/product/product.service'
+import { CategoryService } from '../../../../../../../services/category/category.service'
+import { Product } from '../../../../../../../models/product.model'
+import { Category } from '../../../../../../../models/category.model'
 import { Observable, switchMap, of } from 'rxjs'
+import { FileValidationService } from '../../../../../../../services/product/validation.service'
+import { ImageCompressionService } from '../../../../../../../services/product/compression.service'
+import { StorageService } from '../../../../../../../services/storage/storage.service'
 
 @Component({
    selector: 'app-product-detail',
    imports: [AsyncPipe],
-   templateUrl: './product-detail.component.html',
-   styleUrl: './product-detail.component.css',
+   providers: [ProductService, CategoryService, FileValidationService, ImageCompressionService, StorageService],
+   templateUrl: './detail.html',
+   styleUrl: './detail.css',
 })
 export class ProductDetailComponent implements OnInit {
    private productService = inject(ProductService)
