@@ -1,0 +1,59 @@
+/* Scrollbar personalizado para lista de items */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.order-item-enter {
+  animation: slideIn 0.3s ease-out;
+}
+
+@media (max-width: 768px) {
+  .w-80 {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 1536px) {
+  .product-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

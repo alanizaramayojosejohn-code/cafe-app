@@ -1,0 +1,70 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-2xl mx-auto">
+    <!-- Filtros -->
+    <div class="mb-6 flex gap-2">
+      <button
+        (click)="setFilter('all')"
+        [class.bg-gray-900]="selectedStatus() === 'all'"
+        [class.text-white]="selectedStatus() === 'all'"
+        [class.bg-white]="selectedStatus() !== 'all'"
+        class="px-4 py-2 rounded-lg border border-gray-300 font-medium">
+        Todas
+      </button>
+      <button
+        (click)="setFilter('pendiente')"
+        [class.bg-gray-900]="selectedStatus() === 'pendiente'"
+        [class.text-white]="selectedStatus() === 'pendiente'"
+        [class.bg-white]="selectedStatus() !== 'pendiente'"
+        class="px-4 py-2 rounded-lg border border-gray-300 font-medium">
+        Pendientes
+      </button>
+      <button
+        (click)="setFilter('preparando')"
+        [class.bg-gray-900]="selectedStatus() === 'preparando'"
+        [class.text-white]="selectedStatus() === 'preparando'"
+        [class.bg-white]="selectedStatus() !== 'preparando'"
+        class="px-4 py-2 rounded-lg border border-gray-300 font-medium">
+        En preparación
+      </button>
+    </div>
+
+    <!-- Lista de órdenes -->
+    <div class="space-y-3">
+      @for (order of filterOrders(orders$ | async); track order.id) {
+        <button
+          (click)="selectOrder(order.id)"
+          class="w-full bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all text-left">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="font-semibold text-lg">{{ order.tableName }}</h3>
+            <span class="text-sm text-gray-500">
+              {{ order.createdAt.toDate() | date: 'short' }}
+            </span>
+          </div>
+
+          <p class="text-gray-600 text-sm mb-3">
+            {{ getOrderSummary(order) }}
+          </p>
+
+          <div class="flex justify-between items-center">
+            <span
+              [class.bg-yellow-100]="order.status === 'pendiente'"
+              [class.text-yellow-800]="order.status === 'pendiente'"
+              [class.bg-blue-100]="order.status === 'preparando'"
+              [class.text-blue-800]="order.status === 'preparando'"
+              class="px-3 py-1 rounded-full text-xs font-medium">
+              {{ order.status === 'pendiente' ? 'Pendiente' : 'Preparando' }}
+            </span>
+            <span class="font-bold text-lg">{{ order.total.toFixed(2) }} Bs</span>
+          </div>
+        </button>
+      } @empty {
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p class="text-gray-500">No hay órdenes</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

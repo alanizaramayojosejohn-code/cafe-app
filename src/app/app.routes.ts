@@ -14,6 +14,7 @@ export const routes: Routes = [
    },
    {
       path: 'admin',
+      // canActivate: [roleGuard(['admin'])],
       loadComponent: async () => await import('./ui/admin/container/component'),
       children: AdminRoutes,
    },
@@ -32,4 +33,5 @@ export const routes: Routes = [
       loadComponent: async () => await import('./ui/chef/container/component'),
       children: ChefRoutes,
    },
+   
 ]

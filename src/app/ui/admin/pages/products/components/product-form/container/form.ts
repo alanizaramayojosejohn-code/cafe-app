@@ -14,19 +14,21 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { MatSelectModule } from '@angular/material/select'
 import { MatButtonModule } from '@angular/material/button'
-import { ProductService } from '../../../../../../services/product/product.service'
-import { CategoryService } from '../../../../../../services/category/category.service'
-import { FileValidationService } from '../../../../../../services/product/validation.service'
-import { Category } from '../../../../../../models/category.model'
-import { Product, ProductType, ProductStatus } from '../../../../../../models/product.model'
+import { ProductService } from '../../../../../../../services/product/product.service'
+import { CategoryService } from '../../../../../../../services/category/category.service'
+import { FileValidationService } from '../../../../../../../services/product/validation.service'
+import { Category } from '../../../../../../../models/category.model'
+import { Product, ProductType, ProductStatus } from '../../../../../../../models/product.model'
 import { catchError, debounceTime, distinctUntilChanged, map, Observable, of, switchMap } from 'rxjs'
+import { ImageCompressionService } from '../../../../../../../services/product/compression.service'
+import { StorageService } from '../../../../../../../services/storage/storage.service'
 
 @Component({
    selector: 'app-product-form',
-   standalone: true,
    imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule],
-   templateUrl: './product-form.component.html',
-   styleUrl: './product-form.component.css',
+   providers: [ProductService, CategoryService, FileValidationService, ImageCompressionService, StorageService],
+   templateUrl: './form.html',
+   styleUrl: './form.css',
 })
 export class ProductFormComponent implements OnInit {
    private readonly fb = inject(FormBuilder)

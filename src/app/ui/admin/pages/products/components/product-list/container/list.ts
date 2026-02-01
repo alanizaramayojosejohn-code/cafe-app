@@ -1,17 +1,20 @@
 import { Component, inject, OnInit, output } from '@angular/core'
 import { AsyncPipe, CommonModule } from '@angular/common'
-import { ProductService } from '../../../../../../services/product/product.service'
-import { CategoryService } from '../../../../../../services/category/category.service'
-import { Product } from '../../../../../../models/product.model'
-import { Category } from '../../../../../../models/category.model'
+import { ProductService } from '../../../../../../../services/product/product.service'
+import { CategoryService } from '../../../../../../../services/category/category.service'
+import { Product } from '../../../../../../../models/product.model'
+import { Category } from '../../../../../../../models/category.model'
 import { Observable } from 'rxjs'
+import { FileValidationService } from '../../../../../../../services/product/validation.service'
+import { ImageCompressionService } from '../../../../../../../services/product/compression.service'
+import { StorageService } from '../../../../../../../services/storage/storage.service'
 
 @Component({
    selector: 'app-product-list',
    imports: [AsyncPipe],
-   templateUrl: './product-list.component.html',
-   styleUrl: './product-list.component.css',
-   
+   providers: [ProductService, CategoryService, FileValidationService, ImageCompressionService, StorageService],
+   templateUrl: './list.html',
+   styleUrl: './list.css',
 })
 export class ProductListComponent implements OnInit {
    private productService = inject(ProductService)

@@ -1,0 +1,130 @@
+<div class="min-h-screen bg-gray-50">
+   @if (order$ | async; as order) {
+      <div class="max-w-2xl mx-auto p-4">
+         <button (click)="goBack()" class="mb-4 flex items-center gap-2 text-gray-600 hover:text-gray-900">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Volver</span>
+         </button>
+
+         <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <div class="flex justify-between items-start mb-4">
+               <div>
+                  <h2 class="text-xl font-bold mb-1">{{ order.tableName }}</h2>
+                  <p class="text-sm text-gray-500">{{ order.createdAt.toDate() | date: 'short' }}</p>
+               </div>
+               <span
+                  [class.bg-yellow-100]="order.status === 'pendiente'"
+                  [class.text-yellow-800]="order.status === 'pendiente'"
+                  [class.bg-blue-100]="order.status === 'preparando'"
+                  [class.text-blue-800]="order.status === 'preparando'"
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+               >
+                  {{ order.status === 'pendiente' ? 'Pendiente' : 'Preparando' }}
+               </span>
+            </div>
+
+            <div class="space-y-2 mb-4 pb-4 border-b border-gray-200">
+               @for (item of order.items; track item.productId) {
+                  <div class="flex justify-between text-sm">
+                     <span class="text-gray-600">{{ item.quantity }}x {{ item.product.name }}</span>
+                     <span class="font-medium">{{ item.subtotal.toFixed(2) }} Bs</span>
+                  </div>
+               }
+            </div>
+
+            <div class="space-y-2">
+               <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Subtotal</span>
+                  <span class="font-medium">{{ order.subtotal.toFixed(2) }} Bs</span>
+               </div>
+               <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+                  <span>Total</span>
+                  <span class="text-2xl">{{ order.total.toFixed(2) }} Bs</span>
+               </div>
+            </div>
+         </div>
+
+         <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <div class="flex gap-3 mb-6">
+               <button
+                  (click)="selectPaymentMethod('Efectivo')"
+                  [class.bg-gray-900]="paymentMethod() === 'Efectivo'"
+                  [class.text-white]="paymentMethod() === 'Efectivo'"
+                  [class.bg-gray-100]="paymentMethod() !== 'Efectivo'"
+                  class="flex-1 py-3 rounded-xl font-medium transition-colors"
+               >
+                  Efectivo
+               </button>
+               <button
+                  (click)="selectPaymentMethod('Qr')"
+                  [class.bg-gray-900]="paymentMethod() === 'Qr'"
+                  [class.text-white]="paymentMethod() === 'Qr'"
+                  [class.bg-gray-100]="paymentMethod() !== 'Qr'"
+                  class="flex-1 py-3 rounded-xl font-medium transition-colors"
+               >
+                  Qr
+               </button>
+            </div>
+
+            <div class="space-y-4">
+               <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">NIT</label>
+                  <input
+                     type="text"
+                     [value]="nit()"
+                     (input)="nit.set($any($event.target).value)"
+                     placeholder="NIT del Cliente..."
+                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  />
+               </div>
+
+               @if (paymentMethod() === 'Efectivo') {
+                  <div>
+                     <label class="block text-sm font-medium text-gray-700 mb-2">Monto pagado</label>
+                     <input
+                        type="number"
+                        [value]="amountPaid()"
+                        (input)="updateAmountPaid($any($event.target).value)"
+                        step="0.01"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                     />
+                  </div>
+
+                  <div>
+                     <label class="block text-sm font-medium text-gray-700 mb-2">Cambio</label>
+                     <div class="w-full px-4 py-3 bg-gray-100 rounded-xl text-lg font-bold">
+                        {{ change().toFixed(2) }} Bs
+                     </div>
+                  </div>
+               }
+            </div>
+         </div>
+
+         <div class="space-y-3">
+            <button
+               (click)="goBack()"
+               [disabled]="saving()"
+               class="w-full bg-white text-gray-900 py-4 rounded-xl font-semibold border-2 border-gray-900 hover:bg-gray-50 transition-colors"
+            >
+               Regresar
+            </button>
+            <button
+               (click)="processPayment()"
+               [disabled]="saving()"
+               class="w-full bg-gray-900 text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors"
+            >
+               {{ saving() ? 'Procesando...' : 'Guardar' }}
+            </button>
+         </div>
+      </div>
+   } @else {
+      <div class="flex items-center justify-center min-h-screen">
+         <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p class="text-gray-600">Cargando orden...</p>
+         </div>
+      </div>
+   }
+</div>

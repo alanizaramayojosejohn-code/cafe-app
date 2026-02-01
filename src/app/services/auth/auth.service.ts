@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core'
+import { Injectable, signal, inject } from '@angular/core'
 import {
    Auth,
    createUserWithEmailAndPassword,
@@ -7,32 +7,65 @@ import {
    GoogleAuthProvider,
    signOut,
    authState,
-   User,
+   User as FirebaseUser,
 } from '@angular/fire/auth'
 import { Observable } from 'rxjs'
 import { Router } from '@angular/router'
+import { UserService } from './../user/user.service'
+import { AppUser, UserRole } from '../../models/user.model'
 
 @Injectable({
    providedIn: 'root',
 })
 export class AuthService {
-   user$: Observable<User | null>
-   currentUser = signal<User | null>(null)
+   private auth = inject(Auth)
+   private router = inject(Router)
+   private userService = inject(UserService)
 
-   constructor(
-      private auth: Auth,
-      private router: Router
-   ) {
+   user$: Observable<FirebaseUser | null>
+   currentUser = signal<FirebaseUser | null>(null)
+   userData = signal<AppUser | null>(null)
+   currentRole = signal<UserRole | null>(null)
+
+   constructor() {
       this.user$ = authState(this.auth)
 
-      this.user$.subscribe((user) => {
-         this.currentUser.set(user)
+      this.user$.subscribe(async (firebaseUser) => {
+         this.currentUser.set(firebaseUser)
+
+         if (firebaseUser) {
+            await this.loadUserData(firebaseUser.uid)
+         } else {
+            this.userData.set(null)
+            this.currentRole.set(null)
+         }
       })
    }
 
-   async registerWithEmail(email: string, password: string) {
+   private async loadUserData(uid: string) {
+      try {
+         const user = await this.userService.getUserByUid(uid)
+         if (user) {
+            this.userData.set(user)
+            this.currentRole.set(user.role)
+         }
+      } catch (error) {
+         console.error('Error loading user data:', error)
+      }
+   }
+
+   async registerWithEmail(email: string, password: string, displayName: string = 'Usuario') {
       try {
          const credential = await createUserWithEmailAndPassword(this.auth, email, password)
+
+         await this.userService.createOrUpdateUser(credential.user.uid, {
+            email: credential.user.email!,
+            displayName,
+            role: 'cajero',
+            isActive: true
+         })
+
+         await this.loadUserData(credential.user.uid)
          return credential
       } catch (error: any) {
          throw this.handleError(error)
@@ -42,6 +75,7 @@ export class AuthService {
    async loginWithEmail(email: string, password: string) {
       try {
          const credential = await signInWithEmailAndPassword(this.auth, email, password)
+         await this.loadUserData(credential.user.uid)
          return credential
       } catch (error: any) {
          throw this.handleError(error)
@@ -55,6 +89,15 @@ export class AuthService {
             prompt: 'select_account',
          })
          const credential = await signInWithPopup(this.auth, provider)
+
+         await this.userService.createOrUpdateUser(credential.user.uid, {
+            email: credential.user.email!,
+            displayName: credential.user.displayName || 'Usuario',
+            role: 'cajero',
+            isActive: true
+         })
+
+         await this.loadUserData(credential.user.uid)
          return credential
       } catch (error: any) {
          throw this.handleError(error)
@@ -64,18 +107,33 @@ export class AuthService {
    async logout() {
       try {
          await signOut(this.auth)
+         this.userData.set(null)
+         this.currentRole.set(null)
          this.router.navigate(['/log-in'])
       } catch (error: any) {
          throw this.handleError(error)
       }
    }
 
-   getCurrentUser(): User | null {
+   getCurrentUser(): FirebaseUser | null {
       return this.auth.currentUser
    }
 
    isAuthenticated(): boolean {
       return this.currentUser() !== null
+   }
+
+   hasRole(role: UserRole): boolean {
+      return this.currentRole() === role
+   }
+
+   isAdmin(): boolean {
+      return this.currentRole() === 'admin'
+   }
+
+   hasAnyRole(roles: UserRole[]): boolean {
+      const currentRole = this.currentRole()
+      return currentRole ? roles.includes(currentRole) : false
    }
 
    private handleError(error: any): string {

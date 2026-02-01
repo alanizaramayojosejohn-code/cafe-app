@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router'
 import { MatToolbarModule } from '@angular/material/toolbar'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
-import { AuthService } from '../../../../services/auth.service'
+import { AuthService } from '../../../../services/auth/auth.service'
 import { NavbarOptionsComponent } from '../navbar-options/navbar-options'
 import { User } from '@angular/fire/auth'
 

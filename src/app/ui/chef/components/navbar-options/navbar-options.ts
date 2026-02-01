@@ -16,5 +16,7 @@ export class NavbarOptionsComponent {
       { label: 'Inicio', icon: 'home', route: '/admin/home' },
       { label: 'Productos', icon: 'shopping_cart', route: '/admin/productos' },
       { label: 'Perfil', icon: 'person', route: '/profile' },
+      { label: 'Venta', icon: 'shopping_cart', route: '/admin/sale' },
+      { label: 'Ordenes', icon: 'dollar', route: '/profile/ordenes' },
    ]
 }

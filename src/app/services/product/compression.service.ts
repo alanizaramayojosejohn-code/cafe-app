@@ -1,15 +1,8 @@
 import { Injectable } from '@angular/core'
 import imageCompression from 'browser-image-compression'
+import { CompressionOptions } from '../../models/interface.config'
 
-export interface CompressionOptions {
-  maxSizeMB?: number
-  maxWidthOrHeight?: number
-  useWebWorker?: boolean
-}
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class ImageCompressionService {
   private readonly DEFAULT_OPTIONS: CompressionOptions = {
     maxSizeMB: 1,
