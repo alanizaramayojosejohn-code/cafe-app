@@ -1,112 +1,144 @@
-<div class="min-h-screen bg-white text-white p-6">
-  <div class="max-w-5xl mx-auto">
-    @if (product$ | async; as product) {
+<div class="p-6 space-y-4">
+  <button
+    type="button"
+    (click)="onGoBack()"
+    class="inline-flex items-center gap-1.5 text-sm text-ink-tertiary hover:text-brand-500 transition"
+  >
+    <span class="material-symbols-rounded text-[18px]">arrow_back</span>
+    Volver al listado
+  </button>
 
-    <!-- Header -->
-    <div class="mb-6">
-      <button
-        (click)="onGoBack()"
-        class="w-20 h-10 text-white bg-slate-600 rounded-2xl border-none hover:text-black hover:bg-slate-400 mb-4 flex items-center gap-2 transition"
-      >
-        ← Volver
-      </button>
-      <div class="flex justify-between items-start">
-        <div>
-          <h1 class="text-4xl font-bold text-red-600 mb-2">{{ product.name }}</h1>
-          <p class="text-xl text-gray-400">{{ product.pokename }}</p>
-        </div>
-        <span
-          [class.bg-green-600]="product.status === 'activo'"
-          [class.bg-gray-600]="product.status === 'inactivo'"
-          class="px-4 py-2 rounded-lg font-semibold"
-        >
-          {{ product.status }}
-        </span>
+  @if (product$ | async; as product) {
+    <div class="flex justify-between items-start gap-3 flex-wrap">
+      <div>
+        <p class="font-display text-[10px] font-semibold tracking-[0.25em] text-brand-500">PRODUCTO · DETALLE</p>
+        <h1 class="font-display text-3xl font-bold text-ink-primary mt-1">{{ product.name }}</h1>
+        <p class="text-sm text-ink-tertiary font-mono mt-1">{{ product.pokename }}</p>
       </div>
+      <span
+        class="shrink-0 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-white"
+        [class.bg-success]="product.status === 'activo'"
+        [class.bg-surface-3]="product.status === 'inactivo'"
+        [class.text-ink-tertiary]="product.status === 'inactivo'"
+      >
+        {{ product.status }}
+      </span>
     </div>
 
-    <!-- Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <!-- Image -->
-      <div class="bg-gray-50 border border-gray-800 rounded-lg overflow-hidden">
-        @if (product.imageUrl) {
-        <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-96 object-cover" />
-        } @else {
-        <div class="w-full h-96 flex items-center justify-center text-gray-600">
-          <span class="text-2xl">Sin imagen</span>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="bg-surface-1 border border-line-subtle rounded-md overflow-hidden">
+        <div class="aspect-square bg-surface-2 flex items-center justify-center">
+          @if (product.imageUrl) {
+            <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-full object-cover" />
+          } @else {
+            <span class="material-symbols-rounded text-[64px] text-ink-tertiary opacity-60">image</span>
+          }
         </div>
-        }
       </div>
 
-      <!-- Info -->
-      <div
-        class="bg-gray-100 shadow-sm shadow-black border border-gray-800 rounded-lg p-6 space-y-6"
-      >
-        <!-- Price -->
+      <div class="bg-surface-1 border border-line-subtle rounded-md p-6 space-y-5">
         <div>
-          <p class="text-gray-400 text-sm mb-1">Precio</p>
-          <p class="text-5xl font-bold text-red-600">${{ product.price }}</p>
+          <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">PRECIO DE VENTA</p>
+          <p class="font-display text-4xl font-bold text-brand-500 font-mono mt-1">
+            {{ product.price | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+          </p>
         </div>
 
-        <!-- Type & Category -->
+        @if (product.cost !== undefined && product.cost !== null) {
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">COSTO</p>
+              <p class="font-display text-xl font-bold text-ink-primary font-mono mt-1">
+                {{ product.cost | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+              </p>
+            </div>
+            <div>
+              <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">MARGEN</p>
+              <p
+                class="font-display text-xl font-bold font-mono mt-1"
+                [class.text-success]="product.price - product.cost > 0"
+                [class.text-danger]="product.price - product.cost < 0"
+                [class.text-ink-tertiary]="product.price - product.cost === 0"
+              >
+                {{ product.price - product.cost | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+              </p>
+            </div>
+          </div>
+        }
+
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <p class="text-gray-400 text-sm mb-2">Tipo</p>
-            <span class="inline-block bg-gray-800 px-4 py-2 rounded">{{ product.type }}</span>
+            <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary mb-1">TIPO</p>
+            <span class="inline-block bg-surface-2 text-ink-primary text-xs font-medium px-3 py-1.5 rounded-sm">
+              {{ product.type === 'comestible' ? 'Comestible' : 'No comestible' }}
+            </span>
           </div>
           <div>
-            <p class="text-gray-400 text-sm mb-2">Categoría</p>
-            <span class="inline-block bg-gray-800 px-4 py-2 rounded">
-              {{ (category$ | async)?.name || 'N/A' }}
+            <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary mb-1">CATEGORÍA</p>
+            <span class="inline-block bg-surface-2 text-ink-primary text-xs font-medium px-3 py-1.5 rounded-sm">
+              {{ (category$ | async)?.name || 'Sin categoría' }}
             </span>
           </div>
         </div>
 
-        <!-- Description -->
+        @if (product.type === 'nocomestible') {
+          <div>
+            <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary mb-1">STOCK</p>
+            @if (product.stock === undefined || product.stock === null) {
+              <span class="text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full bg-surface-2 text-ink-tertiary">Sin track</span>
+            } @else if (product.stock === 0) {
+              <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-danger text-white">Agotado</span>
+            } @else if (product.stock < 5) {
+              <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-warning text-white">Stock bajo · {{ product.stock }}</span>
+            } @else {
+              <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-success text-white">{{ product.stock }} unidades</span>
+            }
+          </div>
+        }
+
         <div>
-          <p class="text-gray-400 text-sm mb-2">Descripción</p>
-          <p class="text-gray-200">{{ product.description }}</p>
+          <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary mb-1">DESCRIPCIÓN</p>
+          <p class="text-sm text-ink-secondary leading-relaxed">{{ product.description || '—' }}</p>
         </div>
 
-        <!-- Recipe -->
         @if (product.recipeUrl) {
-        <div>
-          <p class="text-gray-400 text-sm mb-2">Receta</p>
-          <a
-            [href]="product.recipeUrl"
-            target="_blank"
-            class="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition"
-          >
-            📄 Ver Receta
-          </a>
-        </div>
+          <div>
+            <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary mb-1">RECETA</p>
+            <a
+              [href]="product.recipeUrl"
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-line-default text-sm font-medium text-ink-secondary hover:bg-surface-2 hover:text-ink-primary transition"
+            >
+              <span class="material-symbols-rounded text-[16px]">description</span>
+              Ver receta
+            </a>
+          </div>
         }
       </div>
     </div>
 
-    <!-- Actions -->
-    <div class="bg-gray-100 shadow-sm shadow-black border border-gray-800 rounded-lg p-6">
-      <div class="flex gap-4">
-        <button
-          (click)="onEditProduct(product.id!)"
-          class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition"
-        >
-          ✏️ Editar Producto
-        </button>
-        <button
-          (click)="deleteProduct(product)"
-          class="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition"
-        >
-          🗑️ Eliminar Producto
-        </button>
-      </div>
+    <div class="flex flex-wrap gap-2 justify-end">
+      <button
+        type="button"
+        (click)="deleteProduct(product)"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm border border-line-default text-sm font-medium text-danger hover:bg-surface-2 transition"
+      >
+        <span class="material-symbols-rounded text-[18px]">delete</span>
+        Eliminar
+      </button>
+      <button
+        type="button"
+        (click)="onEditProduct(product.id!)"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold shadow-brand transition"
+      >
+        <span class="material-symbols-rounded text-[18px]">edit</span>
+        Editar producto
+      </button>
     </div>
-
-    } @else {
-    <!-- Loading State -->
-    <div class="text-center py-20">
-      <p class="text-gray-500 text-xl">Cargando producto...</p>
+  } @else {
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-12 text-center text-ink-tertiary">
+      Cargando producto…
     </div>
-    }
-  </div>
+  }
 </div>

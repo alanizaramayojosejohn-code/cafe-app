@@ -1,42 +1,29 @@
 import { Component, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms'
-import { Router, RouterLink } from '@angular/router'
-import { MatFormFieldModule } from '@angular/material/form-field'
-import { MatInputModule } from '@angular/material/input'
-import { MatButtonModule } from '@angular/material/button'
-import { MatIconModule } from '@angular/material/icon'
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
-import { MatDividerModule } from '@angular/material/divider'
+import { ActivatedRoute, Router } from '@angular/router'
 import { AuthService } from '../../../../services/auth/auth.service'
 import { UserService } from '../../../../services/user/user.service'
 
 @Component({
    selector: 'app-log-in',
-   imports: [
-      CommonModule,
-      ReactiveFormsModule,
-      MatFormFieldModule,
-      MatInputModule,
-      MatButtonModule,
-      MatIconModule,
-      MatProgressSpinnerModule,
-      MatDividerModule,
-   ],
+   imports: [CommonModule, ReactiveFormsModule],
    providers: [UserService],
    templateUrl: './log-in.component.html',
-   // styleUrls: ['./log-in.component.css']
 })
 export default class LogInComponent {
    loginForm: FormGroup
    loading = signal(false)
    errorMessage = signal('')
+   successMessage = signal('')
    hidePassword = signal(true)
+   sendingReset = signal(false)
 
    constructor(
       private fb: FormBuilder,
       private authService: AuthService,
-      private router: Router
+      private router: Router,
+      private route: ActivatedRoute
    ) {
       this.loginForm = this.fb.group({
          email: ['', [Validators.required, Validators.email]],
@@ -52,12 +39,13 @@ export default class LogInComponent {
       if (this.loginForm.valid) {
          this.loading.set(true)
          this.errorMessage.set('')
+         this.successMessage.set('')
 
          const { email, password } = this.loginForm.value
 
          try {
             await this.authService.loginWithEmail(email, password)
-            this.router.navigate(['/admin'])
+            await this.redirectAfterLogin()
          } catch (error: any) {
             this.errorMessage.set(error)
          } finally {
@@ -68,17 +56,51 @@ export default class LogInComponent {
       }
    }
 
+   async onForgotPassword() {
+      const emailControl = this.loginForm.get('email')
+      const email = (emailControl?.value ?? '').trim()
+
+      if (!email || emailControl?.invalid) {
+         emailControl?.markAsTouched()
+         this.errorMessage.set('Ingresa tu correo para recibir el enlace de recuperación')
+         this.successMessage.set('')
+         return
+      }
+
+      this.sendingReset.set(true)
+      this.errorMessage.set('')
+      this.successMessage.set('')
+
+      try {
+         await this.authService.sendPasswordReset(email)
+         this.successMessage.set(`Te enviamos un correo a ${email} para renovar tu contraseña`)
+      } catch (error: any) {
+         this.errorMessage.set(error)
+      } finally {
+         this.sendingReset.set(false)
+      }
+   }
+
    async loginWithGoogle() {
       this.loading.set(true)
       this.errorMessage.set('')
 
       try {
          await this.authService.loginWithGoogle()
-         this.router.navigate(['/admin'])
+         await this.redirectAfterLogin()
       } catch (error: any) {
          this.errorMessage.set(error)
       } finally {
          this.loading.set(false)
+      }
+   }
+
+   private async redirectAfterLogin() {
+      const returnUrl = this.route.snapshot.queryParams['returnUrl']
+      if (returnUrl) {
+         await this.router.navigateByUrl(returnUrl)
+      } else {
+         await this.authService.redirectByRole()
       }
    }
 

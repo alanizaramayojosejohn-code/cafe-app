@@ -1,0 +1,46 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ─── Helpers ────────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function userDoc() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid));
+    }
+    function hasUserDoc() {
+      return isSignedIn() && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid));
+    }
+    function isActiveUser() {
+      return hasUserDoc() && userDoc().data.isActive == true;
+    }
+    function isStaff() {
+      return isActiveUser();
+    }
+    function isValidImage() {
+      return request.resource.size < 5 * 1024 * 1024
+          && request.resource.contentType.matches('image/.*');
+    }
+
+    // ─── Imágenes de productos ──────────────────────────────────────────────
+    // Lectura pública (se muestran en POS/listados). Escritura sólo staff activo.
+    match /products/{fileName} {
+      allow read: if true;
+      allow write: if isStaff() && isValidImage();
+      allow delete: if isStaff();
+    }
+
+    // ─── Recetas / otros archivos de productos ──────────────────────────────
+    match /recipes/{fileName} {
+      allow read: if true;
+      allow write: if isStaff() && isValidImage();
+      allow delete: if isStaff();
+    }
+
+    // ─── Cerrojo por defecto ────────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

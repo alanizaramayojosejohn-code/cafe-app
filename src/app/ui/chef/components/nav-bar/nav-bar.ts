@@ -1,50 +1,62 @@
-import { Component, OnInit, signal } from '@angular/core'
+import { Component, OnInit, inject, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink } from '@angular/router'
-import { MatToolbarModule } from '@angular/material/toolbar'
-import { MatButtonModule } from '@angular/material/button'
-import { MatIconModule } from '@angular/material/icon'
 import { AuthService } from '../../../../services/auth/auth.service'
+import { SidebarService } from '../../../../services/sidebar/sidebar.service'
+import { ThemeService } from '../../../../services/theme/theme.service'
 import { NavbarOptionsComponent } from '../navbar-options/navbar-options'
 import { User } from '@angular/fire/auth'
 
 @Component({
    selector: 'app-navbar',
-   imports: [CommonModule, RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, NavbarOptionsComponent],
+   imports: [CommonModule, RouterLink, NavbarOptionsComponent],
    templateUrl: './nav-bar.html',
-   styleUrls: ['./nav-bar.css'],
 })
 export class NavbarComponent implements OnInit {
+   private sidebar = inject(SidebarService)
+   private theme = inject(ThemeService)
    user = signal<User | null>(null)
+
+   collapsed = this.sidebar.collapsed
+   mobileOpen = this.sidebar.mobileOpen
+   isDark = this.theme.dark
 
    constructor(public authService: AuthService) {}
 
    ngOnInit() {
-      this.authService.user$.subscribe((user) => {
-         this.user.set(user)
-      })
+      this.authService.user$.subscribe((user) => this.user.set(user))
    }
 
    async logout() {
       await this.authService.logout()
    }
 
-   getUserDisplayName(): string {
-      const currentUser = this.user()
-      if (currentUser?.displayName) {
-         return currentUser.displayName
-      }
-      if (currentUser?.email) {
-         return currentUser.email.split('@')[0]
-      }
-      return 'Usuario'
+   toggleTheme() {
+      this.theme.toggle()
    }
 
-   getUserEmail(): string {
-      return this.user()?.email || 'Sin email'
+   toggleCollapsed() {
+      this.sidebar.toggle()
    }
 
-   getPhotoURL(): string {
-      return this.user()?.photoURL || 'https://ui-avatars.com/api/?name=' + this.getUserDisplayName()
+   openMobile() {
+      this.sidebar.openMobile()
+   }
+
+   closeMobile() {
+      this.sidebar.closeMobile()
+   }
+
+   displayName(): string {
+      const u = this.user()
+      return u?.displayName ?? u?.email?.split('@')[0] ?? 'Cocinero'
+   }
+
+   email(): string {
+      return this.user()?.email || ''
+   }
+
+   initial(): string {
+      return this.displayName().charAt(0).toUpperCase()
    }
 }

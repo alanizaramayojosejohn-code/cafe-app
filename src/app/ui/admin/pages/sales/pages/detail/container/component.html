@@ -1,0 +1,116 @@
+<div class="p-6 space-y-4">
+  <button
+    type="button"
+    (click)="volver()"
+    class="inline-flex items-center gap-1.5 text-sm text-ink-tertiary hover:text-brand-500 transition"
+  >
+    <span class="material-symbols-rounded text-[18px]">arrow_back</span>
+    Volver al listado
+  </button>
+
+  @if (loading()) {
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-12 text-center text-ink-tertiary">
+      Cargando…
+    </div>
+  } @else if (notFound()) {
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-12 text-center">
+      <span class="material-symbols-rounded text-[48px] text-ink-tertiary opacity-60">search_off</span>
+      <p class="font-display text-base font-semibold text-ink-primary mt-2">No se encontró la venta</p>
+    </div>
+  } @else if (order(); as o) {
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-6">
+      <div class="flex justify-between items-start mb-4 gap-3 flex-wrap">
+        <div>
+          <p class="font-display text-[10px] font-semibold tracking-[0.25em] text-brand-500">VENTA · DETALLE</p>
+          <h1 class="font-display text-2xl font-bold text-ink-primary mt-1">{{ o.tableName }}</h1>
+          <p class="text-xs text-ink-tertiary mt-1">
+            Creada {{ o.createdAt.toDate() | date: 'short' }}
+            @if (o.updatedAt && o.updatedAt.toMillis() !== o.createdAt.toMillis()) {
+              · Actualizada {{ o.updatedAt.toDate() | date: 'short' }}
+            }
+          </p>
+        </div>
+        <span
+          [class]="'shrink-0 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ' + statusClasses(o.status)"
+        >
+          {{ statusLabel(o.status) }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-sm border-t border-line-subtle pt-4">
+        <div>
+          <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">CAJERO</p>
+          <p class="font-medium text-ink-primary mt-1">{{ cashierName() || '—' }}</p>
+        </div>
+        <div>
+          <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">ID DE VENTA</p>
+          <p class="font-mono text-xs text-ink-secondary truncate mt-1">{{ o.id }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-6">
+      <h2 class="font-display text-base font-bold text-ink-primary mb-3">Productos</h2>
+      <div class="divide-y divide-line-subtle">
+        @for (item of o.items; track item.productId) {
+          <div class="flex items-center justify-between py-3">
+            <div class="min-w-0">
+              <p class="font-medium text-ink-primary truncate">{{ item.product.name }}</p>
+              <p class="text-xs text-ink-tertiary font-mono">
+                {{ item.price | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }} c/u
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-ink-tertiary">x{{ item.quantity }}</p>
+              <p class="font-semibold text-ink-primary font-mono">
+                {{ item.subtotal | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+              </p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="border-t border-line-subtle mt-4 pt-4 space-y-1.5">
+        <div class="flex justify-between text-sm text-ink-secondary">
+          <span>Subtotal</span>
+          <span class="font-mono">{{ o.subtotal | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between font-display text-lg font-bold text-ink-primary">
+          <span>Total</span>
+          <span class="font-mono">{{ o.total | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    @if (o.status !== 'cancelado' && o.status !== 'entregado') {
+      <div class="flex flex-wrap gap-2 justify-end">
+        <button
+          type="button"
+          (click)="cancelar()"
+          [disabled]="working()"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm border border-line-default text-sm font-medium text-danger hover:bg-surface-2 transition disabled:opacity-50"
+        >
+          <span class="material-symbols-rounded text-[18px]">close</span>
+          {{ working() ? 'Cancelando…' : 'Cancelar venta' }}
+        </button>
+        <button
+          type="button"
+          (click)="editar()"
+          [disabled]="working()"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm border border-line-default text-sm font-medium text-ink-secondary hover:bg-surface-2 hover:text-ink-primary transition disabled:opacity-50"
+        >
+          <span class="material-symbols-rounded text-[18px]">edit</span>
+          Editar
+        </button>
+        <button
+          type="button"
+          (click)="cobrar()"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold shadow-brand transition"
+        >
+          <span class="material-symbols-rounded text-[18px]">payments</span>
+          Cobrar
+        </button>
+      </div>
+    }
+  }
+</div>

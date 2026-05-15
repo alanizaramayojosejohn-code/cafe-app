@@ -1,164 +1,160 @@
-<div
-  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-200 via-slate-300 to-slate-200 p-4"
->
-  <div class="w-full max-w-md">
-    <!-- Card Principal -->
-    <div class="bg-slate-100 rounded-2xl shadow-2xl shadow-black p-8 backdrop-blur-sm">
-      <!-- Header -->
-      <div class="text-center mb-8">
-        <div class="mb-4">
-          <div
-            class="w-16 h-16 bg-gradient-to-br rounded-full mx-auto flex items-center justify-center"
-          >
-            <img
-              src="/images/Logo.webp"
-              alt="Logo"
-              class="w-20 h-20 rounded-full shadow-sm shadow-black"
-            />
-          </div>
-        </div>
-        <h1 class="text-3xl font-bold text-black mb-2">Bienvenido</h1>
-        <p class="text-gray-600">Inicia sesión para continuar</p>
+<div class="min-h-screen w-full bg-surface-0 flex flex-col lg:flex-row">
+
+  <!-- Brand panel (desktop only; en móvil el logo va inline arriba) -->
+
+  <aside
+    class="hidden lg:flex lg:w-[55%] bg-brand-500 text-white relative overflow-hidden p-16 flex-col justify-between">
+    <!-- Glows decorativos -->
+    <div aria-hidden="true"
+      class="absolute top-[-200px] right-[-100px] w-[700px] h-[700px] rounded-full pointer-events-none"
+      style="background: radial-gradient(closest-side, rgba(255,255,255,0.35), transparent)"></div>
+    <div aria-hidden="true"
+      class="absolute bottom-[-150px] left-[-120px] w-[550px] h-[550px] rounded-full pointer-events-none"
+      style="background: radial-gradient(closest-side, rgba(255,255,255,0.22), transparent)"></div>
+
+    <div class="flex flex-col items-center">
+
+      <img src="images/Logo.webp" alt="Poke-Place" class="w-44 h-44 object-contain drop-shadow-md rounded-full" />
+    </div>
+
+    <div class="ml-20 relative max-w-xl space-y-4">
+
+      <p class="font-display text-xs font-semibold tracking-[0.25em] text-white/85">
+        Pokeplace
+      </p>
+      <h1 class="font-display text-5xl font-bold leading-[1.1]">
+        Sistema de Gestión de ventas e inventario.
+      </h1>
+      <p class="text-base leading-relaxed text-white/85">
+        Ventas, órdenes, inventario y pagos — todo en un solo lugar, con roles claros para cada
+        persona del equipo.
+      </p>
+    </div>
+
+    <p class="ml-20 relative flex items-center gap-2 text-sm text-white/85">
+      <span class="material-symbols-rounded text-base">lock</span>
+      Acceso solo por invitación del administrador.
+    </p>
+  </aside>
+
+  <!-- Form panel -->
+  <main class="flex-1 flex items-center justify-center p-6 sm:p-10">
+    <div class="w-full max-w-[420px] space-y-6">
+      <!-- Logo móvil -->
+      <div class="lg:hidden flex flex-col items-center gap-3">
+        <img src="images/Logo.webp" alt="Poke-Place" class="w-28 h-28 object-contain" />
       </div>
 
-      <!-- Mensaje de Error -->
+      <!-- Título -->
+      <div class="space-y-2 lg:space-y-3 text-center lg:text-left">
+        <p class="font-display text-[11px] font-semibold tracking-[0.25em] text-brand-500">
+          BIENVENIDO
+        </p>
+        <h2 class="font-display text-3xl lg:text-4xl font-bold text-ink-primary leading-tight">
+          Iniciar sesión
+        </h2>
+        <p class="text-sm text-ink-secondary">
+          Entra con tu correo o tu cuenta de Google.
+        </p>
+      </div>
+
+      <!-- Alertas -->
       @if (errorMessage()) {
-      <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg animate-shake">
-        <div class="flex items-start gap-3">
-          <mat-icon class="text-red-600 mt-0.5">error_outline</mat-icon>
-          <div>
-            <p class="text-red-800 text-sm font-medium">Error de autenticación</p>
-            <p class="text-red-600 text-sm mt-1">{{ errorMessage() }}</p>
-          </div>
+      <div role="alert" class="rounded-md bg-surface-1 border border-danger/40 px-4 py-3 flex items-start gap-3">
+        <span class="material-symbols-rounded text-danger">error</span>
+        <div class="text-sm">
+          <p class="font-semibold text-ink-primary">Error de autenticación</p>
+          <p class="text-ink-secondary">{{ errorMessage() }}</p>
         </div>
       </div>
       }
 
-      <!-- Formulario -->
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
-        <!-- Campo Email -->
-        <div class="relative">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Correo electrónico</mat-label>
-            <input
-              matInput
-              type="email"
-              formControlName="email"
-              placeholder="tu@email.com"
-              autocomplete="email"
-            />
-            <mat-icon matPrefix class="text-gray-400 mr-2">email</mat-icon>
-            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-            <mat-error>{{ getEmailErrorMessage() }}</mat-error>
-            }
-          </mat-form-field>
+      @if (successMessage()) {
+      <div role="status" class="rounded-md bg-surface-1 border border-success/40 px-4 py-3 flex items-start gap-3">
+        <span class="material-symbols-rounded text-success">mark_email_read</span>
+        <div class="text-sm">
+          <p class="font-semibold text-ink-primary">Correo enviado</p>
+          <p class="text-ink-secondary">{{ successMessage() }}</p>
+        </div>
+      </div>
+      }
+
+      <!-- Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <!-- Email -->
+        <div class="space-y-1.5">
+          <label for="email" class="block text-xs font-medium text-ink-secondary">Correo</label>
+          <div
+            class="flex items-center gap-3 rounded-md bg-surface-1 border border-line px-4 py-3 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-glow transition">
+            <span class="material-symbols-rounded text-ink-tertiary text-[18px]">mail</span>
+            <input id="email" type="email" formControlName="email" autocomplete="email" placeholder="tu@pokeplace.mx"
+              class="flex-1 bg-transparent border-0 outline-none text-sm text-ink-primary placeholder:text-ink-tertiary" />
+          </div>
+          @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+          <p class="text-xs text-danger">{{ getEmailErrorMessage() }}</p>
+          }
         </div>
 
-        <!-- Campo Contraseña -->
-        <div class="relative">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Contraseña</mat-label>
-            <input
-              matInput
-              [type]="hidePassword() ? 'password' : 'text'"
-              formControlName="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-            />
-            <mat-icon matPrefix class="text-gray-400 mr-2">lock</mat-icon>
-            <button
-              mat-icon-button
-              matSuffix
-              type="button"
-              (click)="togglePasswordVisibility()"
-              [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
-              class="hover:bg-gray-100 rounded-full"
-            >
-              <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        <!-- Password -->
+        <div class="space-y-1.5">
+          <div class="flex items-baseline justify-between">
+            <label for="password" class="block text-xs font-medium text-ink-secondary">Contraseña</label>
+            <button type="button" (click)="onForgotPassword()" [disabled]="sendingReset() || loading()"
+              class="text-xs font-medium text-brand-500 hover:text-brand-600 disabled:opacity-50">
+              @if (sendingReset()) { Enviando… } @else { ¿Olvidaste tu contraseña? }
             </button>
-            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-            <mat-error>{{ getPasswordErrorMessage() }}</mat-error>
-            }
-          </mat-form-field>
+          </div>
+          <div
+            class="flex items-center gap-3 rounded-md bg-surface-1 border border-line px-4 py-3 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-glow transition">
+            <span class="material-symbols-rounded text-ink-tertiary text-[18px]">lock</span>
+            <input id="password" [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
+              autocomplete="current-password" placeholder="••••••••"
+              class="flex-1 bg-transparent border-0 outline-none text-sm text-ink-primary placeholder:text-ink-tertiary" />
+            <button type="button" (click)="togglePasswordVisibility()"
+              [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+              class="text-ink-tertiary hover:text-ink-primary transition">
+              <span class="material-symbols-rounded text-[18px]">
+                {{ hidePassword() ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <p class="text-xs text-danger">{{ getPasswordErrorMessage() }}</p>
+          }
         </div>
 
-        <!-- Link Olvidé mi contraseña -->
-        <div class="text-right -mt-2">
-          <a
-            href="#"
-            class="text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors"
-          >
-            ¿Olvidaste tu contraseña?
-          </a>
-        </div>
-
-        <!-- Botón de Envío -->
-        <button
-          mat-raised-button
-          color="primary"
-          type="submit"
-          class="w-full !h-12 !text-base !font-semibold !rounded-lg !shadow-lg hover:!shadow-xl !transition-all !duration-300"
-          [disabled]="loading()"
-        >
+        <!-- Submit -->
+        <button type="submit" [disabled]="loading()"
+          class="w-full flex items-center justify-center gap-2 rounded-md bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white font-semibold text-sm py-4 shadow-brand transition disabled:opacity-60 disabled:cursor-not-allowed">
           @if (loading()) {
-          <div class="flex items-center justify-center gap-2">
-            <mat-spinner diameter="20" class="inline-block"></mat-spinner>
-            <span>Iniciando sesión...</span>
-          </div>
+          <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          <span>Iniciando sesión…</span>
           } @else {
-          <div class="flex items-center justify-center gap-2">
-            <mat-icon>login</mat-icon>
-            <span>Iniciar Sesión</span>
-          </div>
+          <span>Iniciar sesión</span>
+          <span class="material-symbols-rounded text-[18px]">arrow_forward</span>
           }
         </button>
       </form>
 
-      <!-- Divisor -->
-      <div class="relative my-8">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-4 bg-white text-gray-500 font-medium">O continúa con</span>
-        </div>
+      <!-- Divider -->
+      <div class="flex items-center gap-3">
+        <div class="flex-1 h-px bg-line"></div>
+        <span class="text-xs text-ink-tertiary">o continuar con</span>
+        <div class="flex-1 h-px bg-line"></div>
       </div>
 
-      <!-- Botón de Google -->
-      <button
-        mat-stroked-button
-        type="button"
-        class="w-full !h-12 !text-base !font-medium !border-2 !rounded-lg hover:!bg-gray-50 !transition-all !duration-300"
-        (click)="loginWithGoogle()"
-        [disabled]="loading()"
-      >
-        <div class="flex items-center justify-center gap-3">
-          <img
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-            class="w-5 h-5"
-          />
-          <span class="text-gray-700">Continuar con Google</span>
-        </div>
+      <!-- Google -->
+      <button type="button" (click)="loginWithGoogle()" [disabled]="loading()"
+        class="w-full flex items-center justify-center gap-3 rounded-md bg-surface-1 border border-line hover:bg-surface-2 text-ink-primary font-semibold text-sm py-3.5 transition disabled:opacity-60">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt=""
+          class="w-[18px] h-[18px]" />
+        <span>Continuar con Google</span>
       </button>
 
-      <!-- Link a Registro -->
-      <div class="text-center mt-8 pt-6 border-t border-gray-200">
-        <p class="text-sm text-gray-600">
-          ¿No tienes cuenta?
-          <a
-            routerLink="/auth/sign-up"
-            class="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-all ml-1"
-          >
-            Regístrate gratis
-          </a>
-        </p>
-      </div>
+      <!-- Legal -->
+      <p class="text-center text-xs leading-relaxed text-ink-tertiary">
+        Solo personal autorizado. Si no tienes cuenta, contacta al administrador.
+      </p>
     </div>
-
-    <!-- Footer -->
-    <div class="text-center mt-6">
-      <p class="text-white text-sm opacity-90">Protegido con Firebase Authentication</p>
-    </div>
-  </div>
+  </main>
 </div>

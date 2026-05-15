@@ -1,60 +1,66 @@
-import { Component, OnInit, signal } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { MatToolbarModule } from '@angular/material/toolbar'
-import { MatButtonModule } from '@angular/material/button'
-import { MatIconModule } from '@angular/material/icon'
-import { MatCardModule } from '@angular/material/card'
-import { AuthService } from '../../../../services/auth/auth.service'
-import { User } from '@angular/fire/auth'
-import { MatDividerModule } from '@angular/material/divider'
-import { MatMenuModule } from '@angular/material/menu'
+import { Component, computed, inject, signal } from '@angular/core'
+import { DatePipe } from '@angular/common'
+import { toSignal } from '@angular/core/rxjs-interop'
+import { timer, map } from 'rxjs'
+import { OrderService } from '../../../../services/order/order.service'
+import { Order } from '../../../../models/order.model'
 
 @Component({
-   selector: 'app-home',
+   selector: 'app-chef-home',
    standalone: true,
-   imports: [
-      CommonModule,
-      MatToolbarModule,
-      MatButtonModule,
-      MatIconModule,
-      MatCardModule,
-      MatDividerModule,
-      MatMenuModule,
-   ],
+   imports: [DatePipe],
+   providers: [OrderService],
    templateUrl: './home.component.html',
-   // styleUrls: ['./home.component.css']
 })
-export default class Home implements OnInit {
-   user = signal<User | null>(null)
+export default class ChefHome {
+   private orderService = inject(OrderService)
 
-   constructor(public authService: AuthService) {}
+   orders = toSignal(this.orderService.getKitchenOrders(), { initialValue: [] as Order[] })
 
-   ngOnInit() {
-      this.authService.user$.subscribe((user) => {
-         this.user.set(user)
-      })
-   }
+   // Reloj que tick-tack cada 30s para que los minutos transcurridos se actualicen.
+   private ticker = toSignal(timer(0, 30_000).pipe(map(() => new Date())), {
+      initialValue: new Date(),
+   })
 
-   async logout() {
-      await this.authService.logout()
-   }
+   updatingId = signal<string | null>(null)
 
-   getUserDisplayName(): string {
-      const currentUser = this.user()
-      if (currentUser?.displayName) {
-         return currentUser.displayName
+   now = computed(() => this.ticker())
+   clock = computed(() => {
+      const d = this.now()
+      return `${d.getHours().toString().padStart(2, '0')}:${d
+         .getMinutes()
+         .toString()
+         .padStart(2, '0')}`
+   })
+
+   async markReady(order: Order) {
+      if (this.updatingId()) return
+      this.updatingId.set(order.id)
+      try {
+         await this.orderService.markReady(order.id)
+      } catch (error) {
+         console.error('Error al marcar lista:', error)
+         alert('No se pudo marcar la orden como lista')
+      } finally {
+         this.updatingId.set(null)
       }
-      if (currentUser?.email) {
-         return currentUser.email.split('@')[0]
-      }
-      return 'Usuario'
    }
 
-   getUserEmail(): string {
-      return this.user()?.email || 'Sin email'
+   totalItems(order: Order): number {
+      return order.items.reduce((sum, item) => sum + item.quantity, 0)
    }
 
-   getPhotoURL(): string {
-      return this.user()?.photoURL || 'https://ui-avatars.com/api/?name=' + this.getUserDisplayName()
+   minutesAgo(order: Order): number {
+      const d = order.createdAt?.toDate?.()
+      if (!d) return 0
+      return Math.max(0, Math.floor((this.now().getTime() - d.getTime()) / 60000))
+   }
+
+   urgency(order: Order): 'new' | 'ok' | 'warn' | 'late' {
+      const m = this.minutesAgo(order)
+      if (m <= 1) return 'new'
+      if (m < 5) return 'ok'
+      if (m < 10) return 'warn'
+      return 'late'
    }
 }

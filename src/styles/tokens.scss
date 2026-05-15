@@ -1,0 +1,139 @@
+// ============================================================================
+// DESIGN TOKENS — Poke-Place
+// ============================================================================
+// Única fuente de verdad para colores, radios, espaciado y tipografía.
+// Cambiar un valor aquí propaga a Tailwind, CSS global y Angular Material.
+//
+// Tema: BLUE-AMBER — azul royal + ámbar/dorado. Pokémon-cafetería.
+// ============================================================================
+
+:root {
+  // ---- Brand (azul royal) -------------------------------------------------
+  --brand-300: #eeeeee; // azul claro — hover / badges suaves
+  --brand-400: #f63b3b; // azul medio — elementos secundarios
+  --brand-500: #8f1313; // acento principal (botones, sidebar activo)
+  --brand-600: #efefef; // pressed / header sidebar
+  --brand-700: #802029; // texto en badges azules
+  --brand-glow: rgba(216, 29, 29, 0.28);
+
+  // ---- Accent (ámbar / dorado) --------------------------------------------
+  --accent-300: #fd8a8a; // amarillo claro — fondos tinted
+  --accent-400: #fb2424; // ámbar — badges, chips
+  --accent-500: #f50b0b; // acento amarillo principal
+  --accent-600: #d90606; // ámbar oscuro — pressed / hover
+  --accent-700: #920e0e; // texto en badges ámbar
+  --accent-glow: rgba(245, 11, 11, 0.3);
+
+  // ---- Surfaces ----------------------------------------------------------
+  --surface-0: #EFF6FF; // fondo de app (azul-50)
+  --surface-1: #FFFFFF; // cards, inputs
+  --surface-2: #DBEAFE; // hover / sub-card (azul-100)
+  --surface-3: #BFDBFE; // separadores / dim (azul-200)
+
+  // ---- Text --------------------------------------------------------------
+  --text-primary: #0F172A; // slate-900 — cuerpo principal
+  --text-secondary: #334155; // slate-700 — texto secundario
+  --text-tertiary: #64748B; // slate-500 — placeholders, hints
+  --text-disabled: #94A3B8; // slate-400 — deshabilitado
+  --text-on-brand: #FFFFFF; // blanco sobre botones azules (8.5:1)
+  --text-on-accent: #0F172A; // oscuro sobre fondo ámbar (6.5:1)
+
+  // ---- Glass / borders --------------------------------------------------
+  --glass-subtle: rgba(255, 255, 255, 0.40);
+  --glass-default: rgba(255, 255, 255, 0.70);
+  --glass-strong: rgba(255, 255, 255, 0.92);
+  --border-subtle: rgba(29, 78, 216, 0.08);
+  --border-default: rgba(29, 78, 216, 0.18);
+  --border-strong: rgba(29, 78, 216, 0.40);
+
+  // ---- Semantic ---------------------------------------------------------
+  --success: #15803D; // green-700
+  --warning: #D97706; // amber-600 (alineado con acento)
+  --danger: #B91C1C; // red-700
+
+  // ---- Shadows ----------------------------------------------------------
+  --shadow-color: rgba(29, 78, 216, 0.10);
+  --shadow-sm: 0 1px 2px 0 var(--shadow-color);
+  --shadow-md: 0 4px 12px -2px var(--shadow-color);
+  --shadow-lg: 0 8px 24px -4px var(--shadow-color);
+  --shadow-brand: 0 6px 18px -2px var(--brand-glow);
+  --shadow-accent: 0 6px 18px -2px var(--accent-glow);
+
+  // ---- Radius ----------------------------------------------------------
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  // ---- Spacing (escala) ------------------------------------------------
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  // ---- Typography ------------------------------------------------------
+  --font-display: 'Unbounded', system-ui, sans-serif;
+  --font-body: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  // ---- Angular Material M3 overrides ----------------------------------
+  --mat-sys-primary: var(--brand-500);
+  --mat-sys-on-primary: var(--text-on-brand);
+  --mat-sys-primary-container: var(--brand-300);
+  --mat-sys-on-primary-container: var(--brand-700);
+  --mat-sys-secondary: var(--accent-500);
+  --mat-sys-on-secondary: var(--text-on-accent);
+  --mat-sys-secondary-container: var(--accent-300);
+  --mat-sys-on-secondary-container: var(--accent-700);
+  --mat-sys-surface: var(--surface-0);
+  --mat-sys-on-surface: var(--text-primary);
+  --mat-sys-surface-container: var(--surface-1);
+  --mat-sys-surface-container-high: var(--surface-2);
+  --mat-sys-outline: var(--border-default);
+  --mat-sys-outline-variant: var(--border-subtle);
+  --mat-sys-error: var(--danger);
+  --mat-sys-on-error: var(--text-on-brand);
+}
+
+// ============================================================================
+// MODO OSCURO — se activa añadiendo la clase .dark a <html>
+// Solo se sobreescriben las vars que cambian; brand/accent/radius/spacing
+// permanecen igual.
+// ============================================================================
+html.dark {
+  // ---- Surfaces ----------------------------------------------------------
+  --surface-0: #111111;
+  --surface-1: #1C1C1E;
+  --surface-2: #252528;
+  --surface-3: #2E2E31;
+
+  // ---- Text --------------------------------------------------------------
+  --text-primary: #F2F2F2;
+  --text-secondary: #A1A1A6;
+  --text-tertiary: #636366;
+  --text-disabled: #48484A;
+
+  // ---- Glass / borders --------------------------------------------------
+  --glass-subtle: rgba(255, 255, 255, 0.04);
+  --glass-default: rgba(255, 255, 255, 0.08);
+  --glass-strong: rgba(255, 255, 255, 0.16);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.30);
+
+  // ---- Semantic (más brillante para contraste sobre fondo oscuro) --------
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+
+  // ---- Shadows ----------------------------------------------------------
+  --shadow-color: rgba(0, 0, 0, 0.50);
+  --shadow-sm: 0 1px 2px 0 var(--shadow-color);
+  --shadow-md: 0 4px 12px -2px var(--shadow-color);
+  --shadow-lg: 0 8px 24px -4px var(--shadow-color);
+}

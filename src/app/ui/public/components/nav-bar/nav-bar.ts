@@ -3,14 +3,13 @@ import { CommonModule } from '@angular/common'
 import { RouterLink } from '@angular/router'
 import { MatToolbarModule } from '@angular/material/toolbar'
 import { MatButtonModule } from '@angular/material/button'
-import { MatIconModule } from '@angular/material/icon'
 import { AuthService } from '../../../../services/auth/auth.service'
 import { NavbarOptionsComponent } from '../navbar-options/navbar-options'
 import { User } from '@angular/fire/auth'
 
 @Component({
    selector: 'app-navbar',
-   imports: [CommonModule, RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, NavbarOptionsComponent],
+   imports: [CommonModule, RouterLink, MatToolbarModule, MatButtonModule, NavbarOptionsComponent],
    templateUrl: './nav-bar.html',
    styleUrls: ['./nav-bar.css'],
 })

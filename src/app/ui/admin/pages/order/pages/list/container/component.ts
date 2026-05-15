@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { AsyncPipe, DatePipe } from '@angular/common'
+import { AsyncPipe, CurrencyPipe, DatePipe } from '@angular/common'
 import { OrderService } from '../../../../../../../services/order/order.service'
 import { Order } from '../../../../../../../models/order.model'
 import { Observable } from 'rxjs'
@@ -14,7 +14,7 @@ import { ProductRepositoryService } from '../../../../../../../services/product/
 
 @Component({
    selector: 'app-orders-list',
-   imports: [AsyncPipe, DatePipe],
+   imports: [AsyncPipe, CurrencyPipe, DatePipe],
    providers: [
       ProductService,
       TableService,
@@ -33,7 +33,7 @@ export default class OrdersListComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   orders$!: Observable<Order[]>;
-  selectedStatus = signal<'all' | 'pendiente' | 'preparando'>('all');
+  selectedStatus = signal<'all' | 'pendiente' | 'lista' | 'preparando'>('all');
 
   ngOnInit() {
     this.loadOrders();
@@ -48,9 +48,19 @@ export default class OrdersListComponent implements OnInit {
 
     const status = this.selectedStatus();
     if (status === 'all') {
-      return orders.filter(o => o.status === 'pendiente' || o.status === 'preparando');
+      return orders.filter(o => o.status === 'pendiente' || o.status === 'preparando' || o.status === 'lista');
     }
     return orders.filter(o => o.status === status);
+  }
+
+  statusLabel(status: Order['status']): string {
+    switch (status) {
+      case 'pendiente': return 'Pendiente';
+      case 'preparando': return 'Preparando';
+      case 'lista': return 'Lista';
+      case 'entregado': return 'Entregada';
+      case 'cancelado': return 'Cancelada';
+    }
   }
 
   getOrderSummary(order: Order): string {
@@ -67,7 +77,7 @@ export default class OrdersListComponent implements OnInit {
     this.router.navigate([orderId, 'payment'], { relativeTo: this.route });
   }
 
-  setFilter(status: 'all' | 'pendiente' | 'preparando') {
+  setFilter(status: 'all' | 'pendiente' | 'lista' | 'preparando') {
     this.selectedStatus.set(status);
   }
 }

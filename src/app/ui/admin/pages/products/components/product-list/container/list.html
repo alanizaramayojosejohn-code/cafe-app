@@ -1,103 +1,150 @@
-<div class="min-h-screen bg-white text-black p-6">
-  <div class="max-w-7xl mx-auto">
-
-    <div class="flex justify-between items-center mb-8">
-      <h1 class="text-4xl font-bold text-gray-600">Productos</h1>
-      <button
-        (click)="onCreateProduct()"
-        class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition"
-      >
-        + Nuevo Producto
-      </button>
+<div class="p-6 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+      <p class="font-display text-[10px] font-semibold tracking-[0.25em] text-brand-500">PRODUCTOS</p>
+      <h1 class="font-display text-3xl font-bold text-ink-primary mt-1">Productos</h1>
+      <p class="text-sm text-ink-tertiary mt-1">Gestiona el catálogo de comida y objetos.</p>
     </div>
+    <button
+      type="button"
+      (click)="onCreateProduct()"
+      class="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-4 py-2.5 rounded-sm text-sm font-semibold shadow-brand transition"
+    >
+      <span class="material-symbols-rounded text-[18px]">add</span>
+      Nuevo producto
+    </button>
+  </div>
 
-    @if (categories$ | async; as categories) {
-    <div class="mb-6">
-      <div class="flex gap-2 flex-wrap">
+  @if (categories$ | async; as categories) {
+    <div class="flex gap-2 flex-wrap">
+      <button
+        type="button"
+        (click)="filterByCategory(null)"
+        class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+        [class.bg-brand-500]="selectedCategoryId === null"
+        [class.text-white]="selectedCategoryId === null"
+        [class.border-brand-500]="selectedCategoryId === null"
+        [class.shadow-brand]="selectedCategoryId === null"
+        [class.bg-surface-1]="selectedCategoryId !== null"
+        [class.text-ink-secondary]="selectedCategoryId !== null"
+        [class.border-line-subtle]="selectedCategoryId !== null"
+        [class.hover:bg-surface-2]="selectedCategoryId !== null"
+      >
+        Todos
+      </button>
+      @for (category of categories; track category.id) {
         <button
-          (click)="filterByCategory(null)"
-          [class.bg-gray-600]="selectedCategoryId === null"
-          [class.bg-gray-800]="selectedCategoryId !== null"
-          class="px-4 py-2 rounded-lg hover:bg-gray-700 transition"
-        >
-          Todos
-        </button>
-        @for (category of categories; track category.id) {
-        <button
+          type="button"
           (click)="filterByCategory(category.id ?? null)"
-          [class.bg-gray-600]="selectedCategoryId === category.id"
-          [class.bg-white]="selectedCategoryId !== category.id"
-          class="px-4 py-2 rounded-lg hover:bg-gray-700 transition hover:text-white"
+          class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+          [class.bg-brand-500]="selectedCategoryId === category.id"
+          [class.text-white]="selectedCategoryId === category.id"
+          [class.border-brand-500]="selectedCategoryId === category.id"
+          [class.shadow-brand]="selectedCategoryId === category.id"
+          [class.bg-surface-1]="selectedCategoryId !== category.id"
+          [class.text-ink-secondary]="selectedCategoryId !== category.id"
+          [class.border-line-subtle]="selectedCategoryId !== category.id"
+          [class.hover:bg-surface-2]="selectedCategoryId !== category.id"
         >
           {{ category.name }}
         </button>
-        }
-      </div>
-    </div>
-    }
-
-    @if (products$ | async; as products) { @if (products.length > 0) {
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      @for (product of products; track product.id) {
-      <div
-        class="bg-gray-100 border shadow-sm shadow-black rounded-lg overflow-hidden hover:border-gray-600 transition"
-      >
-        <div class="h-48 bg-white overflow-hidden">
-          @if (product.imageUrl) {
-          <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-full object-cover" />
-          } @else {
-          <div class="w-full h-full flex items-center justify-center text-gray-600">Sin imagen</div>
-          }
-        </div>
-
-        <div class="p-4">
-          <div class="flex justify-between items-start mb-2">
-            <h3 class="text-xl font-bold text-gray-900">{{ product.name }}</h3>
-            <span
-              [class.bg-green-600]="product.status === 'activo'"
-              [class.bg-gray-600]="product.status === 'inactivo'"
-              class="text-xs px-2 py-1 rounded"
-            >
-              {{ product.status }}
-            </span>
-          </div>
-
-          <p class="text-sm text-gray-400 mb-1">{{ product.pokename }}</p>
-          <p class="text-gray-300 text-sm mb-3 line-clamp-2">{{ product.description }}</p>
-
-          <div class="flex justify-between items-center mb-4">
-            <span class="text-2xl font-bold text-red-600">${{ product.price }}</span>
-            <span class="text-xs px-2 py-1 bg-gray-800 rounded">{{ product.type }}</span>
-          </div>
-
-          <div class="flex gap-2">
-            <button
-              (click)="onEditProduct(product.id!)"
-              class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition"
-            >
-              Editar
-            </button>
-            <button
-              (click)="onViewDetail(product.id!)"
-              class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition"
-            >
-              Ver
-            </button>
-            <button
-              (click)="deleteProduct(product)"
-              class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition"
-            >
-              Eliminar
-            </button>
-          </div>
-        </div>
-      </div>
       }
     </div>
+  }
+
+  @if (products$ | async; as products) {
+    @if (products.length > 0) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        @for (product of products; track product.id) {
+          <div
+            class="bg-surface-1 border border-line-subtle rounded-md overflow-hidden hover:border-brand-500 hover:shadow-md transition flex flex-col"
+          >
+            <div class="aspect-[4/3] bg-surface-2 overflow-hidden flex items-center justify-center shrink-0">
+              @if (product.imageUrl) {
+                <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-full object-cover" />
+              } @else {
+                <span class="material-symbols-rounded text-[40px] text-ink-tertiary opacity-60">image</span>
+              }
+            </div>
+
+            <div class="p-4 flex-1 flex flex-col">
+              <div class="flex justify-between items-start gap-2 mb-2">
+                <h3 class="font-display text-base font-bold text-ink-primary truncate flex-1">{{ product.name }}</h3>
+                <span
+                  class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-white"
+                  [class.bg-success]="product.status === 'activo'"
+                  [class.bg-surface-3]="product.status === 'inactivo'"
+                  [class.text-ink-tertiary]="product.status === 'inactivo'"
+                >
+                  {{ product.status }}
+                </span>
+              </div>
+
+              <p class="text-xs text-ink-tertiary font-mono mb-1 truncate">{{ product.pokename }}</p>
+              <p class="text-sm text-ink-secondary mb-3 line-clamp-2">{{ product.description }}</p>
+
+              <div class="flex justify-between items-center mb-3">
+                <span class="font-display text-2xl font-bold text-brand-500 font-mono">
+                  {{ product.price | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+                </span>
+                <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface-2 text-ink-tertiary">
+                  {{ product.type === 'comestible' ? 'comida' : 'objeto' }}
+                </span>
+              </div>
+
+              @if (product.type === 'nocomestible') {
+                <div class="mb-3">
+                  @if (product.stock === undefined || product.stock === null) {
+                    <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface-2 text-ink-tertiary">Sin track</span>
+                  } @else if (product.stock === 0) {
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-danger text-white">Agotado</span>
+                  } @else if (product.stock < 5) {
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-warning text-white">Stock bajo · {{ product.stock }}</span>
+                  } @else {
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-success text-white">Stock · {{ product.stock }}</span>
+                  }
+                </div>
+              }
+
+              <div class="flex gap-1.5 mt-auto pt-3 border-t border-line-subtle">
+                <button
+                  type="button"
+                  (click)="onViewDetail(product.id!)"
+                  title="Ver detalle"
+                  class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-sm text-xs font-medium border border-line-default text-ink-secondary hover:bg-surface-2 hover:text-ink-primary transition"
+                >
+                  <span class="material-symbols-rounded text-[14px]">visibility</span>
+                  Ver
+                </button>
+                <button
+                  type="button"
+                  (click)="onEditProduct(product.id!)"
+                  title="Editar"
+                  class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-sm text-xs font-medium border border-line-default text-ink-secondary hover:bg-surface-2 hover:text-ink-primary transition"
+                >
+                  <span class="material-symbols-rounded text-[14px]">edit</span>
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  (click)="deleteProduct(product)"
+                  title="Eliminar"
+                  class="inline-flex items-center justify-center w-8 h-8 rounded-sm border border-line-default text-danger hover:bg-surface-2 transition"
+                  aria-label="Eliminar"
+                >
+                  <span class="material-symbols-rounded text-[16px]">delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     } @else {
-    <div class="text-center py-20">
-      <p class="text-gray-500 text-xl">No hay productos disponibles</p>
-    </div>
-    } }
-  </div>
+      <div class="bg-surface-1 border border-line-subtle rounded-md p-12 text-center">
+        <span class="material-symbols-rounded text-[48px] text-ink-tertiary opacity-60">inventory_2</span>
+        <p class="font-display text-base font-semibold text-ink-primary mt-2">No hay productos</p>
+        <p class="text-sm text-ink-tertiary mt-1">Crea el primero con el botón “Nuevo producto”.</p>
+      </div>
+    }
+  }
 </div>

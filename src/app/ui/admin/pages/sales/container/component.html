@@ -1,195 +1,322 @@
-<div class="flex h-screen bg-gray-50">
-   <div class="w-70 bg-white border-r border-gray-200 flex flex-col">
-      <div class="p-4 border-b border-gray-200">
-         <div class="flex items-center justify-between mb-4"> </div>
+<div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+  <!-- Header -->
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <button
+        type="button"
+        (click)="goBackToList()"
+        aria-label="Volver"
+        class="w-10 h-10 flex items-center justify-center rounded-md bg-surface-1 border border-line hover:bg-surface-2 transition"
+      >
+        <span class="material-symbols-rounded text-[18px] text-ink-primary">arrow_back</span>
+      </button>
 
-         <div class="mb-3">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Mesa</label>
-            <select
-               [value]="selectedTableId()"
-               (change)="selectTable($any($event.target).value)"
-               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            >
-               <option value="">Seleccionar mesa</option>
-               @for (table of tables$ | async; track table.id) {
-                  <option [value]="table.id">{{ table.name }}</option>
-               }
-            </select>
-         </div>
+      <div>
+        <p class="font-display text-[11px] font-semibold tracking-[0.25em] text-brand-500">
+          POS · {{ isEditing() ? 'EDITANDO' : 'NUEVA VENTA' }}
+        </p>
+        <h1 class="font-display text-2xl md:text-3xl font-bold text-ink-primary leading-tight">
+          {{ isEditing() ? 'Editar venta' : 'Cobrar' }}
+        </h1>
+      </div>
+    </div>
 
-         <div class="space-y-1 text-sm text-gray-600"></div>
+    <div class="flex items-center gap-3">
+      <!-- Mesa selector -->
+      <div class="relative">
+        <select
+          [ngModel]="selectedTableId()"
+          (ngModelChange)="selectTable($event)"
+          class="appearance-none pl-10 pr-9 py-2.5 rounded-full bg-surface-1 border border-line text-sm font-medium text-ink-primary hover:bg-surface-2 transition cursor-pointer"
+        >
+          <option value="" disabled>Selecciona mesa</option>
+          @for (t of allTables(); track t.id) {
+            <option [value]="t.id">
+              {{ t.name }}{{ t.location ? ' · ' + t.location : '' }}
+            </option>
+          }
+        </select>
+        <span
+          class="material-symbols-rounded text-[16px] text-ink-tertiary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+        >
+          table_restaurant
+        </span>
+        <span
+          class="material-symbols-rounded text-[16px] text-ink-tertiary absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+        >
+          keyboard_arrow_down
+        </span>
       </div>
 
-      <div class="flex-1 overflow-y-auto p-4 space-y-2">
-         @if (orderItems().length === 0) {
-            <div class="text-center text-gray-400 py-8">
-               <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                     stroke-linecap="round"
-                     stroke-linejoin="round"
-                     stroke-width="2"
-                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                  />
-               </svg>
-               <p>No hay productos agregados</p>
-            </div>
-         }
+      <button
+        type="button"
+        (click)="saveOrder()"
+        [disabled]="saving() || orderItems().length === 0"
+        class="inline-flex items-center gap-2 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-5 py-2.5 shadow-brand transition disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (saving()) {
+          <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          <span>Guardando…</span>
+        } @else {
+          <span class="material-symbols-rounded text-[18px]">check</span>
+          <span>{{ isEditing() ? 'Actualizar' : 'Guardar pedido' }}</span>
+        }
+      </button>
+    </div>
+  </header>
 
-         @for (item of orderItems(); track item.productId) {
-            <div class="bg-gray-50 rounded-lg p-2 flex items-center gap-3 hover:bg-gray-100 transition-colors">
-               <div class="flex-1 min-w-0">
-                  <h4 class="font-medium text-sm truncate">{{ item.product.name }}</h4>
-                  <p class="text-sm font-bold text-gray-900">{{ item.subtotal }} Bs</p>
-               </div>
-               <div class="flex items-center gap-2">
-                  <button
-                     (click)="updateQuantity(item.productId, item.quantity - 1)"
-                     class="w-7 h-7 rounded-full bg-white border border-gray-300 hover:bg-gray-50 flex items-center justify-center"
-                  >
-                     <span class="text-sm font-medium">−</span>
-                  </button>
-                  <span class="text-sm font-medium w-6 text-center">{{ item.quantity }}</span>
-                  <button
-                     (click)="updateQuantity(item.productId, item.quantity + 1)"
-                     class="w-7 h-7 rounded-full bg-white border border-gray-300 hover:bg-gray-50 flex items-center justify-center"
-                  >
-                     <span class="text-sm font-medium">+</span>
-                  </button>
-                  <button (click)="removeProduct(item.productId)" class="ml-2 text-red-500 hover:text-red-700">
-                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                           stroke-linecap="round"
-                           stroke-linejoin="round"
-                           stroke-width="2"
-                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                     </svg>
-                  </button>
-               </div>
-            </div>
-         }
-      </div>
+  @if (loadingOrder()) {
+    <div class="rounded-lg bg-surface-1 border border-line p-12 text-center text-sm text-ink-tertiary">
+      Cargando venta…
+    </div>
+  } @else {
+    <!-- Main 2-col -->
+    <div class="grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] gap-5">
+      <!-- Catalog -->
+      <section class="rounded-lg bg-surface-1 border border-line p-5 space-y-4">
+        <!-- Search -->
+        <div
+          class="flex items-center gap-3 rounded-md bg-surface-2 border border-line-subtle px-4 py-3"
+        >
+          <span class="material-symbols-rounded text-[18px] text-ink-tertiary">search</span>
+          <input
+            type="text"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            placeholder="Buscar producto…"
+            class="flex-1 bg-transparent border-0 outline-none text-sm text-ink-primary placeholder:text-ink-tertiary"
+          />
+        </div>
 
-      <div class="p-4 border-t border-gray-200 space-y-3">
-         <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-               <span class="text-gray-600">Subtotal</span>
-               <span class="font-medium">{{ subtotal() }} Bs</span>
-            </div>
-            <div class="flex justify-between text-lg font-bold">
-               <span>Total</span>
-               <span>{{ total().toFixed(2) }} Bs</span>
-            </div>
-         </div>
+        <!-- Tabs Comida / Objetos -->
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="selectTab('Comida')"
+            [class.bg-brand-500]="selectedTab() === 'Comida'"
+            [class.text-white]="selectedTab() === 'Comida'"
+            [class.bg-surface-2]="selectedTab() !== 'Comida'"
+            [class.text-ink-secondary]="selectedTab() !== 'Comida'"
+            class="px-4 py-2 rounded-full text-sm font-semibold transition hover:opacity-90"
+          >
+            Comida
+          </button>
+          <button
+            type="button"
+            (click)="selectTab('Objetos')"
+            [class.bg-brand-500]="selectedTab() === 'Objetos'"
+            [class.text-white]="selectedTab() === 'Objetos'"
+            [class.bg-surface-2]="selectedTab() !== 'Objetos'"
+            [class.text-ink-secondary]="selectedTab() !== 'Objetos'"
+            class="px-4 py-2 rounded-full text-sm font-semibold transition hover:opacity-90"
+          >
+            Objetos
+          </button>
+        </div>
 
-         <button
-            (click)="saveOrder()"
-            [disabled]="orderItems().length === 0 || !selectedTableId() || saving()"
-            class="w-full bg-gray-900 text-white py-3 rounded-lg font-medium hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-         >
-            {{ saving() ? 'Guardando...' : 'Guardar' }}
-         </button>
-      </div>
-   </div>
-
-   <div class="flex-1 flex flex-col">
-      <div class="bg-white border-b border-gray-200 p-4">
-         <div class="mb-4">
-            <div class="relative">
-               <input
-                  type="text"
-                  [value]="searchQuery()"
-                  (input)="searchQuery.set($any($event.target).value)"
-                  placeholder="Buscar productos..."
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-               />
-               <svg
-                  class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-               >
-                  <path
-                     stroke-linecap="round"
-                     stroke-linejoin="round"
-                     stroke-width="2"
-                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-               </svg>
-            </div>
-         </div>
-
-         <div class="flex justify-center gap-4">
+        <!-- Category chips -->
+        @if (filteredCategories().length > 0) {
+          <div class="flex flex-wrap gap-2">
             <button
-               (click)="selectTab('Comida')"
-               [class.bg-gray-300]="selectedTab() === 'Comida'"
-               class="px-14 py-2 rounded-2xl border-red-400 font-medium hover:bg-gray-100 transition-colors"
+              type="button"
+              (click)="selectCategory('')"
+              [class.bg-brand-500]="selectedCategoryId() === ''"
+              [class.text-white]="selectedCategoryId() === ''"
+              [class.bg-surface-2]="selectedCategoryId() !== ''"
+              [class.text-ink-secondary]="selectedCategoryId() !== ''"
+              [class.border]="selectedCategoryId() !== ''"
+              [class.border-line-subtle]="selectedCategoryId() !== ''"
+              class="px-3 py-1.5 rounded-full text-xs font-semibold transition"
             >
-               Comida
+              Todos
             </button>
-            <button
-               (click)="selectTab('Objetos')"
-               [class.bg-gray-300]="selectedTab() === 'Objetos'"
-               class="px-14 py-2 rounded-2xl border-red-400 font-medium hover:bg-gray-100 transition-colors"
-            >
-               Objetos
-            </button>
-         </div>
-      </div>
-
-      <div class="flex-1 overflow-y-auto p-6">
-         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
-            @for (product of filteredProducts(); track product.id) {
-               @if (product.status === 'activo') {
-                  <button
-                     (click)="addProduct(product)"
-                     class="flex items-center bg-white rounded-lg p-3 border border-gray-200 hover:border-red-500 hover:shadow-md transition-all group"
-                  >
-                     <div class="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
-                        @if (product.imageUrl) {
-                           <img
-                              [src]="product.imageUrl"
-                              [alt]="product.name"
-                              class="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                           />
-                        } @else {
-                           <div class="w-full h-full flex items-center justify-center text-gray-400">
-                              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                 <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                 />
-                              </svg>
-                           </div>
-                        }
-                     </div>
-                     <div class="flex-1 ml-4 text-left min-w-0">
-                        <h3 class="font-medium text-sm truncate">{{ product.name }}</h3>
-                        <p class="text-xs text-gray-500">{{ product.pokename }}</p>
-                     </div>
-                     <div class="ml-4 flex-shrink-0">
-                        <p class="text-lg font-bold">{{ product.price }} Bs</p>
-                     </div>
-                  </button>
-               }
+            @for (c of filteredCategories(); track c.id) {
+              <button
+                type="button"
+                (click)="selectCategory(c.id!)"
+                [class.bg-brand-500]="selectedCategoryId() === c.id"
+                [class.text-white]="selectedCategoryId() === c.id"
+                [class.bg-surface-2]="selectedCategoryId() !== c.id"
+                [class.text-ink-secondary]="selectedCategoryId() !== c.id"
+                [class.border]="selectedCategoryId() !== c.id"
+                [class.border-line-subtle]="selectedCategoryId() !== c.id"
+                class="px-3 py-1.5 rounded-full text-xs font-semibold transition"
+              >
+                {{ c.name }}
+              </button>
             }
-         </div>
+          </div>
+        }
 
-         @if (filteredProducts().length === 0) {
-            <div class="text-center py-12">
-               <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                     stroke-linecap="round"
-                     stroke-linejoin="round"
-                     stroke-width="2"
-                     d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        <!-- Grid -->
+        @if (filteredProducts().length === 0) {
+          <div class="py-12 text-center text-sm text-ink-tertiary">
+            Sin productos para mostrar.
+          </div>
+        } @else {
+          <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+            @for (p of filteredProducts(); track p.id) {
+              @let stockAvail = availableStock(p);
+              @let isOut = stockAvail !== null && stockAvail <= 0;
+              @let isLow = stockAvail !== null && stockAvail > 0 && stockAvail <= 5;
+              <button
+                type="button"
+                (click)="addProduct(p)"
+                [disabled]="isOut"
+                class="group flex flex-col items-center gap-2 rounded-md bg-surface-2 border p-4 transition hover:-translate-y-0.5 hover:shadow-sm disabled:opacity-55 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                [class.border-line-subtle]="!isLow && !isOut"
+                [class.border-warning]="isLow"
+                [class.border-danger]="isOut"
+              >
+                @if (p.imageUrl) {
+                  <img
+                    [src]="p.imageUrl"
+                    [alt]="p.name"
+                    class="w-10 h-10 object-contain rounded-sm"
                   />
-               </svg>
-               <p class="text-gray-500">No se encontraron productos</p>
-            </div>
-         }
-      </div>
-   </div>
+                } @else {
+                  <span class="material-symbols-rounded text-[32px] text-brand-500">
+                    {{ p.type === 'comestible' ? 'local_cafe' : 'inventory_2' }}
+                  </span>
+                }
+                <p class="text-xs font-semibold text-ink-primary text-center line-clamp-2 leading-tight">
+                  {{ p.name }}
+                </p>
+                <p class="font-mono text-sm font-bold text-ink-primary">
+                  {{ p.price | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+                </p>
+
+                @if (isOut) {
+                  <span
+                    class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-danger text-white"
+                  >
+                    Agotado
+                  </span>
+                } @else if (isLow) {
+                  <span
+                    class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-warning text-white"
+                  >
+                    Bajo · {{ stockAvail }}
+                  </span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- Cart / Ticket -->
+      <aside class="rounded-lg bg-surface-1 border border-line p-5 space-y-4 lg:sticky lg:top-24 h-fit">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">
+              TICKET
+            </p>
+            <p class="font-display text-xl font-bold text-ink-primary">
+              {{ orderItems().length ? 'En preparación' : 'Sin items' }}
+            </p>
+          </div>
+          <span
+            class="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-brand-500 text-white text-[11px] font-bold font-mono"
+          >
+            {{ orderItems().length }} items
+          </span>
+        </div>
+
+        <!-- Items -->
+        @if (orderItems().length === 0) {
+          <div class="py-10 text-center text-sm text-ink-tertiary">
+            Toca un producto para agregarlo.
+          </div>
+        } @else {
+          <ul class="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
+            @for (item of orderItems(); track item.productId) {
+              <li class="flex items-center gap-3 rounded-md bg-surface-2 p-3">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-ink-primary truncate">
+                    {{ item.product.name }}
+                  </p>
+                  <p class="font-mono text-[11px] text-ink-tertiary">
+                    {{ item.price | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }} c/u
+                  </p>
+                </div>
+
+                <div class="flex items-center gap-1">
+                  <button
+                    type="button"
+                    (click)="updateQuantity(item.productId, item.quantity - 1)"
+                    aria-label="Restar"
+                    class="w-7 h-7 flex items-center justify-center rounded-sm bg-surface-1 border border-line-subtle hover:bg-surface-3 transition"
+                  >
+                    <span class="material-symbols-rounded text-[14px] text-ink-primary">remove</span>
+                  </button>
+                  <span
+                    class="font-mono text-sm font-bold text-ink-primary w-6 text-center"
+                  >
+                    {{ item.quantity }}
+                  </span>
+                  <button
+                    type="button"
+                    (click)="updateQuantity(item.productId, item.quantity + 1)"
+                    aria-label="Sumar"
+                    class="w-7 h-7 flex items-center justify-center rounded-sm bg-brand-500 hover:bg-brand-600 transition"
+                  >
+                    <span class="material-symbols-rounded text-[14px] text-white">add</span>
+                  </button>
+                </div>
+
+                <p class="font-mono text-sm font-bold text-ink-primary w-20 text-right">
+                  {{ item.subtotal | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+                </p>
+
+                <button
+                  type="button"
+                  (click)="removeProduct(item.productId)"
+                  aria-label="Quitar"
+                  class="text-ink-tertiary hover:text-danger transition"
+                >
+                  <span class="material-symbols-rounded text-[16px]">close</span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+        <div class="border-t border-line-subtle pt-4 space-y-2">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-ink-secondary">Subtotal</span>
+            <span class="font-mono font-semibold text-ink-primary">
+              {{ subtotal() | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-ink-tertiary">
+            <span>{{ orderItems().length }} items</span>
+            <span>Sin IVA</span>
+          </div>
+        </div>
+
+        <div class="rounded-md bg-brand-500 text-white p-4 flex items-center justify-between">
+          <div>
+            <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-white/85">
+              TOTAL
+            </p>
+            <p class="text-xs text-white/85">{{ selectedTableLabel() || 'Selecciona mesa' }}</p>
+          </div>
+          <p class="font-mono text-2xl font-bold">
+            {{ total() | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+          </p>
+        </div>
+
+        @if (orderItems().length > 0) {
+          <button
+            type="button"
+            (click)="clearOrder()"
+            class="w-full text-xs font-medium text-ink-tertiary hover:text-danger transition py-1"
+          >
+            Limpiar orden
+          </button>
+        }
+      </aside>
+    </div>
+  }
 </div>

@@ -25,7 +25,12 @@ import { StorageService } from '../../../../../../../services/storage/storage.se
 
 @Component({
    selector: 'app-product-form',
-   imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule],
+   imports: [CommonModule,
+     ReactiveFormsModule,
+      MatFormFieldModule,
+       MatInputModule,
+        MatSelectModule,
+         MatButtonModule],
    providers: [ProductService, CategoryService, FileValidationService, ImageCompressionService, StorageService],
    templateUrl: './form.html',
    styleUrl: './form.css',
@@ -85,13 +90,35 @@ export class ProductFormComponent implements OnInit {
          name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(15)]],
          description: ['', Validators.required],
          price: [0, [Validators.required, Validators.min(1)]],
+         cost: [null as number | null, [Validators.min(0)]],
          type: ['comestible' as ProductType, Validators.required],
          status: ['activo' as ProductStatus, Validators.required],
          categoryId: ['', Validators.required],
+         stock: [null as number | null, [Validators.min(0)]],
          userId: ['user-default'],
       })
 
       this.FormValueChanges()
+      this.applyStockVisibility()
+   }
+
+   private applyStockVisibility(): void {
+      const typeCtrl = this.productForm.get('type')
+      const apply = (type: string | null) => {
+         const stockCtrl = this.productForm.get('stock')
+         if (type === 'nocomestible') {
+            stockCtrl?.enable({ emitEvent: false })
+         } else {
+            stockCtrl?.setValue(null, { emitEvent: false })
+            stockCtrl?.disable({ emitEvent: false })
+         }
+      }
+      apply(typeCtrl?.value)
+      typeCtrl?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(apply)
+   }
+
+   isNoComestible(): boolean {
+      return this.productForm?.get('type')?.value === 'nocomestible'
    }
 
    private FormValueChanges(): void {
@@ -269,21 +296,31 @@ export class ProductFormComponent implements OnInit {
    }
 
    private async saveProduct() {
-      const formValue = this.productForm.value
+      const formValue = this.productForm.getRawValue()
       const imageFile = this.imageFile() ?? undefined
       const recipeFile = this.recipeFile() ?? undefined
 
+      const payload: Record<string, unknown> = { ...formValue }
+      if (formValue.type !== 'nocomestible' || formValue.stock === null || formValue.stock === undefined) {
+         delete payload['stock']
+      } else {
+         payload['stock'] = Number(formValue.stock)
+      }
+      if (formValue.cost === null || formValue.cost === undefined || formValue.cost === '') {
+         delete payload['cost']
+      } else {
+         payload['cost'] = Number(formValue.cost)
+      }
+
       if (this.isEditMode() && this.productId()) {
          const currentProduct = this.currentProduct()
-         const updates = {
-            ...formValue,
-            imagePath: currentProduct?.imagePath,
-            recipePath: currentProduct?.recipePath,
-         }
+         const updates: Record<string, unknown> = { ...payload }
+         if (currentProduct?.imagePath !== undefined) updates['imagePath'] = currentProduct.imagePath
+         if (currentProduct?.recipePath !== undefined) updates['recipePath'] = currentProduct.recipePath
 
-         await this.productService.updateProduct(this.productId()!, updates, imageFile, recipeFile)
+         await this.productService.updateProduct(this.productId()!, updates as Partial<Product>, imageFile, recipeFile)
       } else {
-         await this.productService.addProduct(formValue, imageFile, recipeFile)
+         await this.productService.addProduct(payload as any, imageFile, recipeFile)
       }
    }
 

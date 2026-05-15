@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, output } from '@angular/core'
-import { AsyncPipe, CommonModule } from '@angular/common'
+import { AsyncPipe, CurrencyPipe } from '@angular/common'
 import { ProductService } from '../../../../../../../services/product/product.service'
 import { CategoryService } from '../../../../../../../services/category/category.service'
 import { Product } from '../../../../../../../models/product.model'
@@ -11,7 +11,7 @@ import { StorageService } from '../../../../../../../services/storage/storage.se
 
 @Component({
    selector: 'app-product-list',
-   imports: [AsyncPipe],
+   imports: [AsyncPipe, CurrencyPipe],
    providers: [ProductService, CategoryService, FileValidationService, ImageCompressionService, StorageService],
    templateUrl: './list.html',
    styleUrl: './list.css',

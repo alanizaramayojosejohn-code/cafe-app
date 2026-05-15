@@ -1,7 +1,8 @@
 import { Timestamp } from '@angular/fire/firestore'
 import { Product } from './product.model'
 
-export type OrderStatus = 'pendiente' | 'preparando' | 'entregado' | 'cancelado'
+export type OrderStatus = 'pendiente' | 'preparando' | 'lista' | 'entregado' | 'cancelado'
+export type PaymentMethod = 'efectivo' | 'qr'
 
 export interface OrderItem {
    productId: string
@@ -23,6 +24,8 @@ export interface Order {
    createdAt: Timestamp
    updatedAt: Timestamp
    userId?: string
+   /** Método de pago. Solo presente cuando status === 'entregado'. */
+   paymentMethod?: PaymentMethod
 }
 
 export interface OrderCreate extends Omit<Order, 'id' | 'createdAt' | 'updatedAt'> {}

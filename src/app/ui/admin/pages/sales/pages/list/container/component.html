@@ -1,0 +1,299 @@
+<div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+  <!-- Header -->
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div class="space-y-1">
+      <p class="font-display text-[11px] font-semibold tracking-[0.25em] text-brand-500">
+        VENTAS
+      </p>
+      <h1 class="font-display text-3xl lg:text-4xl font-bold text-ink-primary leading-tight">
+        Ventas del día
+      </h1>
+      <p class="text-sm text-ink-secondary">{{ totals().all }} ventas registradas hoy</p>
+    </div>
+
+    <button
+      type="button"
+      (click)="nuevaVenta()"
+      class="inline-flex items-center gap-2 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-5 py-3 shadow-brand transition"
+    >
+      <span class="material-symbols-rounded text-[18px]">add</span>
+      Nueva venta
+    </button>
+  </header>
+
+  <!-- Stats strip -->
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+    <div class="flex items-center gap-3 rounded-md bg-surface-1 border border-line px-5 py-4">
+      <span class="material-symbols-rounded text-[22px] text-brand-500">receipt_long</span>
+      <div>
+        <p class="font-display text-[10px] font-semibold tracking-[0.15em] text-ink-tertiary">VENTAS</p>
+        <p class="font-display text-lg font-bold text-ink-primary">{{ totals().all }}</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 rounded-md bg-surface-1 border border-line px-5 py-4">
+      <span class="material-symbols-rounded text-[22px] text-success">payments</span>
+      <div>
+        <p class="font-display text-[10px] font-semibold tracking-[0.15em] text-ink-tertiary">
+          INGRESOS HOY
+        </p>
+        <p class="font-mono text-lg font-bold text-ink-primary">
+          {{ totals().ingresoEntregadas | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 rounded-md bg-surface-1 border border-line px-5 py-4">
+      <span class="material-symbols-rounded text-[22px] text-warning">pending</span>
+      <div>
+        <p class="font-display text-[10px] font-semibold tracking-[0.15em] text-ink-tertiary">
+          ABIERTAS
+        </p>
+        <p class="font-display text-lg font-bold text-ink-primary">
+          {{ totals().pendientes + totals().listas }}
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 rounded-md bg-surface-1 border border-line px-5 py-4">
+      <span class="material-symbols-rounded text-[22px] text-danger">cancel</span>
+      <div>
+        <p class="font-display text-[10px] font-semibold tracking-[0.15em] text-ink-tertiary">
+          CANCELADAS
+        </p>
+        <p class="font-display text-lg font-bold text-ink-primary">{{ totals().canceladas }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <div class="flex flex-wrap gap-2">
+    <button
+      type="button"
+      (click)="setFilter('all')"
+      [class.bg-brand-500]="selectedStatus() === 'all'"
+      [class.text-white]="selectedStatus() === 'all'"
+      [class.bg-surface-1]="selectedStatus() !== 'all'"
+      [class.text-ink-secondary]="selectedStatus() !== 'all'"
+      [class.border]="selectedStatus() !== 'all'"
+      [class.border-line]="selectedStatus() !== 'all'"
+      class="px-4 py-2 rounded-full text-sm font-semibold transition"
+    >
+      Todas · {{ totals().all }}
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('pendiente')"
+      [class.bg-brand-500]="selectedStatus() === 'pendiente'"
+      [class.text-white]="selectedStatus() === 'pendiente'"
+      [class.bg-surface-1]="selectedStatus() !== 'pendiente'"
+      [class.text-ink-secondary]="selectedStatus() !== 'pendiente'"
+      [class.border]="selectedStatus() !== 'pendiente'"
+      [class.border-line]="selectedStatus() !== 'pendiente'"
+      class="px-4 py-2 rounded-full text-sm font-semibold transition"
+    >
+      Pendientes · {{ totals().pendientes }}
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('lista')"
+      [class.bg-brand-500]="selectedStatus() === 'lista'"
+      [class.text-white]="selectedStatus() === 'lista'"
+      [class.bg-surface-1]="selectedStatus() !== 'lista'"
+      [class.text-ink-secondary]="selectedStatus() !== 'lista'"
+      [class.border]="selectedStatus() !== 'lista'"
+      [class.border-line]="selectedStatus() !== 'lista'"
+      class="px-4 py-2 rounded-full text-sm font-semibold transition"
+    >
+      Listas · {{ totals().listas }}
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('entregado')"
+      [class.bg-brand-500]="selectedStatus() === 'entregado'"
+      [class.text-white]="selectedStatus() === 'entregado'"
+      [class.bg-surface-1]="selectedStatus() !== 'entregado'"
+      [class.text-ink-secondary]="selectedStatus() !== 'entregado'"
+      [class.border]="selectedStatus() !== 'entregado'"
+      [class.border-line]="selectedStatus() !== 'entregado'"
+      class="px-4 py-2 rounded-full text-sm font-semibold transition"
+    >
+      Entregadas · {{ totals().entregadas }}
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('cancelado')"
+      [class.bg-brand-500]="selectedStatus() === 'cancelado'"
+      [class.text-white]="selectedStatus() === 'cancelado'"
+      [class.bg-surface-1]="selectedStatus() !== 'cancelado'"
+      [class.text-ink-secondary]="selectedStatus() !== 'cancelado'"
+      [class.border]="selectedStatus() !== 'cancelado'"
+      [class.border-line]="selectedStatus() !== 'cancelado'"
+      class="px-4 py-2 rounded-full text-sm font-semibold transition"
+    >
+      Canceladas · {{ totals().canceladas }}
+    </button>
+  </div>
+
+  <!-- Loading / Empty -->
+  @if (loading()) {
+    <div class="rounded-lg bg-surface-1 border border-line p-12 text-center text-sm text-ink-tertiary">
+      Cargando ventas…
+    </div>
+  } @else if (filteredOrders().length === 0) {
+    <div class="rounded-lg bg-surface-1 border border-line p-12 text-center space-y-2">
+      <span class="material-symbols-rounded text-[48px] text-ink-tertiary">inbox</span>
+      <p class="text-sm text-ink-tertiary">Sin ventas en este filtro.</p>
+    </div>
+  } @else {
+    <!-- Table (desktop) -->
+    <div class="hidden lg:block rounded-lg bg-surface-1 border border-line overflow-hidden">
+      <div
+        class="grid grid-cols-[110px_130px_1fr_120px_150px_170px_100px_130px] items-center gap-3 px-5 py-3 bg-surface-2 border-b border-line"
+      >
+        <span class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">
+          # ORDEN
+        </span>
+        <span class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">MESA</span>
+        <span class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">ITEMS</span>
+        <span
+          class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary text-right"
+        >
+          TOTAL
+        </span>
+        <span class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">
+          ESTADO
+        </span>
+        <span class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">
+          CAJERO
+        </span>
+        <span class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">HORA</span>
+        <span></span>
+      </div>
+
+      @for (order of filteredOrders(); track order.id) {
+        <button
+          type="button"
+          (click)="verDetalle(order.id)"
+          class="w-full grid grid-cols-[110px_130px_1fr_120px_150px_170px_100px_130px] items-center gap-3 px-5 py-3.5 text-left transition border-b border-line-subtle last:border-0"
+          [class.bg-brand-glow]="order.status === 'lista'"
+          [class.hover:bg-surface-2]="order.status !== 'lista'"
+          [class.opacity-55]="order.status === 'cancelado'"
+        >
+          <span
+            class="font-mono text-sm text-ink-primary"
+            [class.line-through]="order.status === 'cancelado'"
+            [class.font-bold]="order.status === 'lista'"
+            [class.font-semibold]="order.status !== 'lista' && order.status !== 'cancelado'"
+          >
+            #{{ order.id.slice(-4).toUpperCase() }}
+          </span>
+          <span class="text-sm font-medium text-ink-primary truncate">{{ order.tableName }}</span>
+          <span class="text-sm text-ink-secondary truncate">{{ getOrderSummary(order) }}</span>
+          <span
+            class="font-mono text-sm font-bold text-ink-primary text-right"
+            [class.line-through]="order.status === 'cancelado'"
+          >
+            {{ order.total | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+          </span>
+          <span>
+            <span
+              [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold ' + statusClasses(order.status)"
+            >
+              {{ statusLabel(order.status) }}
+            </span>
+          </span>
+          <span class="text-sm text-ink-secondary truncate">{{ cashierName(order.userId) }}</span>
+          <span class="font-mono text-xs text-ink-tertiary">
+            {{ order.createdAt?.toDate() | date: 'HH:mm' }}
+          </span>
+          <span class="flex items-center justify-end gap-2">
+            @if (order.status === 'lista') {
+              <button
+                type="button"
+                (click)="cobrar(order.id, $event)"
+                class="text-xs font-semibold px-3 py-1.5 rounded-sm bg-brand-500 text-white hover:bg-brand-600 transition"
+              >
+                Cobrar
+              </button>
+            } @else if (order.status !== 'entregado' && order.status !== 'cancelado') {
+              <button
+                type="button"
+                (click)="editar(order.id, $event)"
+                aria-label="Editar"
+                class="w-8 h-8 flex items-center justify-center rounded-sm bg-surface-2 hover:bg-surface-3 transition"
+              >
+                <span class="material-symbols-rounded text-[16px] text-ink-secondary">edit</span>
+              </button>
+              <button
+                type="button"
+                (click)="cancelar(order, $event)"
+                aria-label="Cancelar"
+                class="w-8 h-8 flex items-center justify-center rounded-sm bg-surface-2 hover:bg-surface-3 transition"
+              >
+                <span class="material-symbols-rounded text-[16px] text-danger">close</span>
+              </button>
+            } @else {
+              <span class="material-symbols-rounded text-[16px] text-ink-tertiary">visibility</span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+
+    <!-- Cards (mobile) -->
+    <div class="space-y-3 lg:hidden">
+      @for (order of filteredOrders(); track order.id) {
+        <button
+          type="button"
+          (click)="verDetalle(order.id)"
+          class="w-full text-left rounded-md bg-surface-1 border p-4 space-y-2.5 transition"
+          [class.bg-brand-glow]="order.status === 'lista'"
+          [class.border-brand-500]="order.status === 'lista'"
+          [class.border-2]="order.status === 'lista'"
+          [class.border-line]="order.status !== 'lista'"
+          [class.opacity-55]="order.status === 'cancelado'"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-display text-lg font-bold text-ink-primary leading-tight">
+                {{ order.tableName }}
+              </p>
+              <p class="font-mono text-[11px] text-ink-tertiary">
+                #{{ order.id.slice(-4).toUpperCase() }} · {{ order.items.length }} items
+              </p>
+            </div>
+            <div class="text-right">
+              <p
+                class="font-mono text-lg font-bold text-ink-primary"
+                [class.line-through]="order.status === 'cancelado'"
+              >
+                {{ order.total | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+              </p>
+              <p class="font-mono text-[11px] text-ink-tertiary">
+                {{ order.createdAt?.toDate() | date: 'HH:mm' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span
+                [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold ' + statusClasses(order.status)"
+              >
+                {{ statusLabel(order.status) }}
+              </span>
+              <span class="text-xs text-ink-tertiary truncate">{{ cashierName(order.userId) }}</span>
+            </div>
+            @if (order.status === 'lista') {
+              <button
+                type="button"
+                (click)="cobrar(order.id, $event)"
+                class="text-xs font-bold px-3 py-1.5 rounded-sm bg-brand-500 text-white"
+              >
+                Cobrar
+              </button>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  }
+</div>

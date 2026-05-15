@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ────────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function hasUserDoc() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function isActiveUser() {
+      return hasUserDoc() && userDoc().data.isActive == true;
+    }
+    function isAdmin() {
+      return isActiveUser() && userDoc().data.role == 'admin';
+    }
+    function isStaff() {
+      // Cualquier rol activo (admin, cajero, cocinero).
+      return isActiveUser();
+    }
+    function tokenEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    // ─── users/{uid} ─────────────────────────────────────────────────────────
+    // Cada usuario lee su propio doc (necesario en loadUserData).
+    // Admin lee/lista/escribe todo.
+    // Crear: el mismo usuario (bootstrap/provisioning) o un admin.
+    match /users/{uid} {
+      allow get:    if isOwner(uid) || isAdmin();
+      allow list:   if isAdmin();
+      allow create: if isOwner(uid) || isAdmin();
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+
+      // Subcolección de pagos/descuentos. Admin escribe; el dueño puede leer sus pagos.
+      match /payments/{paymentId} {
+        allow read:  if isOwner(uid) || isAdmin();
+        allow write: if isAdmin();
+      }
+    }
+
+    // ─── pendingUsers/{email} ───────────────────────────────────────────────
+    // Admin invita / gestiona. El invitado puede leer y borrar el suyo (para claim).
+    match /pendingUsers/{email} {
+      allow get:         if isAdmin() || (isSignedIn() && tokenEmail() == email);
+      allow list:        if isAdmin();
+      allow create, update: if isAdmin();
+      allow delete:      if isAdmin() || (isSignedIn() && tokenEmail() == email);
+    }
+
+    // ─── Catálogo operativo ─────────────────────────────────────────────────
+    // Cualquier staff activo lee/escribe. Apretaremos más adelante.
+    match /products/{id}        { allow read, write: if isStaff(); }
+    match /categories/{id}      { allow read, write: if isStaff(); }
+    match /tables/{id}          { allow read, write: if isStaff(); }
+    match /orders/{id}          { allow read, write: if isStaff(); }
+    match /inventoryNotes/{id}  { allow read, write: if isStaff(); }
+
+    // ─── Cerrojo por defecto ────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

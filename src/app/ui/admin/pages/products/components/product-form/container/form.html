@@ -1,286 +1,263 @@
-<div class="min-h-screen bg-white text-white p-6">
-   <div class="max-w-3xl mx-auto">
-      <div class="mb-8">
-         <h1 class="text-4xl font-bold text-red-600 mb-2">
-            {{ isEditMode() ? 'Editar Producto' : 'Nuevo Producto' }}
-         </h1>
-         <p class="text-gray-400">Completa la información del producto</p>
+<div class="p-6 space-y-6">
+  <div>
+    <p class="font-display text-[10px] font-semibold tracking-[0.25em] text-brand-500">PRODUCTO</p>
+    <h1 class="font-display text-3xl font-bold text-ink-primary mt-1">
+      {{ isEditMode() ? 'Editar producto' : 'Nuevo producto' }}
+    </h1>
+    <p class="text-sm text-ink-tertiary mt-1">Completa la información del producto.</p>
+  </div>
+
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-6 space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Pokename</mat-label>
+          <input matInput formControlName="pokename" placeholder="Pikachu" autocomplete="off" />
+          @if (hasFieldError('pokename')) {
+            <mat-error>{{ getFieldError('pokename') }}</mat-error>
+          }
+          @if (productForm.get('pokename')?.pending) {
+            <mat-hint>Verificando disponibilidad…</mat-hint>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Nombre del producto</mat-label>
+          <input matInput formControlName="name" placeholder="Café Latte" autocomplete="off" />
+          @if (hasFieldError('name')) {
+            <mat-error>{{ getFieldError('name') }}</mat-error>
+          }
+        </mat-form-field>
       </div>
 
-      <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
-         <div class="bg-white shadow-sm shadow-black border border-gray-800 rounded-lg p-6 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Pokename</mat-label>
-                  <input matInput formControlName="pokename" placeholder="Pikachu" autocomplete="off" />
-                  @if (hasFieldError('pokename')) {
-                     <mat-error>{{ getFieldError('pokename') }}</mat-error>
-                  }
-                  @if (productForm.get('pokename')?.pending) {
-                     <mat-hint>Verificando disponibilidad...</mat-hint>
-                  }
-               </mat-form-field>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Descripción</mat-label>
+        <textarea
+          matInput
+          formControlName="description"
+          rows="4"
+          placeholder="Describe el producto…"
+        ></textarea>
+        @if (hasFieldError('description')) {
+          <mat-error>{{ getFieldError('description') }}</mat-error>
+        }
+      </mat-form-field>
 
-               <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Nombre del Producto</mat-label>
-                  <input matInput formControlName="name" placeholder="Café Pikachu" autocomplete="off" />
-                  @if (hasFieldError('name')) {
-                     <mat-error>{{ getFieldError('name') }}</mat-error>
-                  }
-               </mat-form-field>
-            </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Precio de venta</mat-label>
+          <input matInput type="number" formControlName="price" placeholder="0.00" step="0.01" min="0" />
+          <span matPrefix>Bs&nbsp;</span>
+          @if (hasFieldError('price')) {
+            <mat-error>{{ getFieldError('price') }}</mat-error>
+          }
+        </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
-               <mat-label>Descripción</mat-label>
-               <textarea
-                  matInput
-                  formControlName="description"
-                  rows="4"
-                  placeholder="Describe el producto..."
-               ></textarea>
-               @if (hasFieldError('description')) {
-                  <mat-error>{{ getFieldError('description') }}</mat-error>
-               }
-            </mat-form-field>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Costo de elaboración</mat-label>
+          <input matInput type="number" formControlName="cost" placeholder="0.00" step="0.01" min="0" />
+          <span matPrefix>Bs&nbsp;</span>
+          <mat-hint>Opcional. Se usa para calcular ganancias.</mat-hint>
+          @if (hasFieldError('cost')) {
+            <mat-error>{{ getFieldError('cost') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-               <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Precio</mat-label>
-                  <input matInput type="number" formControlName="price" placeholder="0.00" step="0.01" min="0" />
-                  <span matPrefix>$&nbsp;</span>
-                  @if (hasFieldError('price')) {
-                     <mat-error>{{ getFieldError('price') }}</mat-error>
-                  }
-               </mat-form-field>
-
-               <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Tipo</mat-label>
-                  <mat-select formControlName="type">
-                     @for (type of productTypes; track type) {
-                        <mat-option [value]="type">
-                           {{ type === 'comestible' ? 'Comestible' : 'No Comestible' }}
-                        </mat-option>
-                     }
-                  </mat-select>
-               </mat-form-field>
-
-               <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Estado</mat-label>
-                  <mat-select formControlName="status">
-                     @for (status of productStatuses; track status) {
-                        <mat-option [value]="status">
-                           {{ status === 'activo' ? 'Activo' : 'Inactivo' }}
-                        </mat-option>
-                     }
-                  </mat-select>
-               </mat-form-field>
-            </div>
-
-            @if (categories$ | async; as categories) {
-               <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Categoría</mat-label>
-                  <mat-select formControlName="categoryId">
-                     <mat-option value="">Seleccione una categoría</mat-option>
-                     @for (category of categories; track category.id) {
-                        <mat-option [value]="category.id">{{ category.name }}</mat-option>
-                     }
-                  </mat-select>
-                  @if (hasFieldError('categoryId')) {
-                     <mat-error>{{ getFieldError('categoryId') }}</mat-error>
-                  }
-               </mat-form-field>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="type">
+            @for (type of productTypes; track type) {
+              <mat-option [value]="type">
+                {{ type === 'comestible' ? 'Comestible' : 'No comestible' }}
+              </mat-option>
             }
+          </mat-select>
+        </mat-form-field>
 
-            <div>
-               <label class="block text-sm font-medium text-gray-700 mb-2"> Imagen del Producto </label>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            @for (status of productStatuses; track status) {
+              <mat-option [value]="status">
+                {{ status === 'activo' ? 'Activo' : 'Inactivo' }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
 
-               <div class="flex items-center gap-4">
-                  <input
-                     type="file"
-                     (change)="onImageSelected($event)"
-                     accept="image/jpeg,image/png,image/webp"
-                     class="hidden"
-                     [disabled]="isSubmitting()"
-                     #imageInput
-                  />
-                  <button
-                     type="button"
-                     (click)="imageInput.click()"
-                     [disabled]="isSubmitting()"
-                     class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                     {{ imageFile() || currentProduct()?.imageUrl ? 'Cambiar Imagen' : 'Seleccionar Imagen' }}
-                  </button>
+      @if (categories$ | async; as categories) {
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Categoría</mat-label>
+          <mat-select formControlName="categoryId">
+            <mat-option value="">Seleccione una categoría</mat-option>
+            @for (category of categories; track category.id) {
+              <mat-option [value]="category.id">{{ category.name }}</mat-option>
+            }
+          </mat-select>
+          @if (hasFieldError('categoryId')) {
+            <mat-error>{{ getFieldError('categoryId') }}</mat-error>
+          }
+        </mat-form-field>
+      }
 
-                  <span class="text-gray-600 text-sm">
-                     @if (imageFile()) {
-                        {{ imageFile()!.name }}
-                     } @else if (currentProduct()?.imageUrl) {
-                        Imagen actual
-                     } @else {
-                        Sin imagen
-                     }
-                  </span>
-               </div>
+      @if (isNoComestible()) {
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Stock</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="stock"
+            placeholder="Cantidad disponible"
+            min="0"
+            step="1"
+          />
+          <mat-hint>Déjalo vacío si no quieres trackear inventario para este producto.</mat-hint>
+          @if (hasFieldError('stock')) {
+            <mat-error>{{ getFieldError('stock') }}</mat-error>
+          }
+        </mat-form-field>
+      }
 
-               @if (imageError()) {
-                  <div class="mt-2 flex items-center gap-2">
-                     <svg class="w-4 h-4 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                           fill-rule="evenodd"
-                           d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                           clip-rule="evenodd"
-                        />
-                     </svg>
-                     <p class="text-sm text-red-600">{{ imageError() }}</p>
-                  </div>
-               }
+      <div>
+        <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary mb-2">
+          IMAGEN DEL PRODUCTO
+        </p>
+        <div class="flex items-center gap-3 flex-wrap">
+          <input
+            type="file"
+            (change)="onImageSelected($event)"
+            accept="image/jpeg,image/png,image/webp"
+            class="hidden"
+            [disabled]="isSubmitting()"
+            #imageInput
+          />
+          <button
+            type="button"
+            (click)="imageInput.click()"
+            [disabled]="isSubmitting()"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium border border-line-default text-ink-secondary hover:bg-surface-2 hover:text-ink-primary transition disabled:opacity-50"
+          >
+            <span class="material-symbols-rounded text-[16px]">image</span>
+            {{ imageFile() || currentProduct()?.imageUrl ? 'Cambiar imagen' : 'Seleccionar imagen' }}
+          </button>
+          <span class="text-sm text-ink-tertiary">
+            @if (imageFile()) {
+              {{ imageFile()!.name }}
+            } @else if (currentProduct()?.imageUrl) {
+              Imagen actual
+            } @else {
+              Sin imagen
+            }
+          </span>
+        </div>
 
-               @if (imagePreviewUrl()) {
-                  <div class="mt-4">
-                     <img
-                        [src]="imagePreviewUrl()!"
-                        alt="Vista previa"
-                        class="w-32 h-32 object-cover rounded border border-gray-300"
-                     />
-                  </div>
-               }
+        @if (imageError()) {
+          <p class="mt-2 inline-flex items-center gap-1.5 text-sm text-danger">
+            <span class="material-symbols-rounded text-[16px]">error</span>
+            {{ imageError() }}
+          </p>
+        }
 
-               <p class="mt-2 text-xs text-gray-500"> Formatos permitidos: JPEG, PNG, WebP. Máximo 5MB </p>
-            </div>
+        @if (imagePreviewUrl()) {
+          <img
+            [src]="imagePreviewUrl()!"
+            alt="Vista previa"
+            class="mt-3 w-32 h-32 object-cover rounded-sm border border-line-subtle"
+          />
+        }
 
-            <div>
-               <label class="block text-sm font-medium text-gray-700 mb-2"> Documento de Receta (Opcional) </label>
+        <p class="mt-2 text-xs text-ink-tertiary">Formatos permitidos: JPEG, PNG, WebP. Máximo 5 MB.</p>
+      </div>
 
-               <div class="flex items-center gap-4">
-                  <input
-                     type="file"
-                     (change)="onRecipeSelected($event)"
-                     accept="application/pdf,image/jpeg,image/png,image/webp"
-                     class="hidden"
-                     [disabled]="isSubmitting()"
-                     #recipeInput
-                  />
-                  <button
-                     type="button"
-                     (click)="recipeInput.click()"
-                     [disabled]="isSubmitting()"
-                     class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                     {{ recipeFile() || currentProduct()?.recipeUrl ? 'Cambiar Receta' : 'Seleccionar Receta' }}
-                  </button>
+      <div>
+        <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary mb-2">
+          DOCUMENTO DE RECETA (OPCIONAL)
+        </p>
+        <div class="flex items-center gap-3 flex-wrap">
+          <input
+            type="file"
+            (change)="onRecipeSelected($event)"
+            accept="application/pdf,image/jpeg,image/png,image/webp"
+            class="hidden"
+            [disabled]="isSubmitting()"
+            #recipeInput
+          />
+          <button
+            type="button"
+            (click)="recipeInput.click()"
+            [disabled]="isSubmitting()"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium border border-line-default text-ink-secondary hover:bg-surface-2 hover:text-ink-primary transition disabled:opacity-50"
+          >
+            <span class="material-symbols-rounded text-[16px]">description</span>
+            {{ recipeFile() || currentProduct()?.recipeUrl ? 'Cambiar receta' : 'Seleccionar receta' }}
+          </button>
+          <span class="text-sm text-ink-tertiary">
+            @if (recipeFile()) {
+              {{ recipeFile()!.name }}
+            } @else if (currentProduct()?.recipeUrl) {
+              Receta actual
+            } @else {
+              Sin receta
+            }
+          </span>
+        </div>
 
-                  <span class="text-gray-600 text-sm">
-                     @if (recipeFile()) {
-                        {{ recipeFile()!.name }}
-                     } @else if (currentProduct()?.recipeUrl) {
-                        Receta actual
-                     } @else {
-                        Sin receta
-                     }
-                  </span>
-               </div>
+        @if (recipeError()) {
+          <p class="mt-2 inline-flex items-center gap-1.5 text-sm text-danger">
+            <span class="material-symbols-rounded text-[16px]">error</span>
+            {{ recipeError() }}
+          </p>
+        }
 
-               @if (recipeError()) {
-                  <div class="mt-2 flex items-center gap-2">
-                     <svg class="w-4 h-4 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                           fill-rule="evenodd"
-                           d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                           clip-rule="evenodd"
-                        />
-                     </svg>
-                     <p class="text-sm text-red-600">{{ recipeError() }}</p>
-                  </div>
-               }
+        @if (currentProduct()?.recipeUrl && !recipeFile()) {
+          <a
+            [href]="currentProduct()!.recipeUrl"
+            target="_blank"
+            rel="noopener"
+            class="mt-2 inline-flex items-center gap-1 text-sm text-brand-500 hover:text-brand-600 transition"
+          >
+            <span class="material-symbols-rounded text-[16px]">visibility</span>
+            Ver receta actual
+          </a>
+        }
 
-               @if (currentProduct()?.recipeUrl && !recipeFile()) {
-                  <a
-                     [href]="currentProduct()!.recipeUrl"
-                     target="_blank"
-                     class="mt-2 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                  >
-                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                           stroke-linecap="round"
-                           stroke-linejoin="round"
-                           stroke-width="2"
-                           d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                           stroke-linecap="round"
-                           stroke-linejoin="round"
-                           stroke-width="2"
-                           d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                     </svg>
-                     Ver receta actual
-                  </a>
-               }
+        <p class="mt-2 text-xs text-ink-tertiary">Formatos permitidos: PDF, JPEG, PNG, WebP. Máximo 5 MB.</p>
+      </div>
+    </div>
 
-               <p class="mt-2 text-xs text-gray-500"> Formatos permitidos: PDF, JPEG, PNG, WebP. Máximo 5MB </p>
-            </div>
-         </div>
+    @if (errorMessage()) {
+      <div class="bg-surface-1 border border-danger rounded-md p-4 flex items-center gap-3">
+        <span class="material-symbols-rounded text-danger">error</span>
+        <p class="text-sm text-danger">{{ errorMessage() }}</p>
+      </div>
+    }
 
-         @if (errorMessage()) {
-            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-               <div class="flex items-center gap-3">
-                  <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                     <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clip-rule="evenodd"
-                     />
-                  </svg>
-                  <p class="text-sm text-red-800">{{ errorMessage() }}</p>
-               </div>
-            </div>
-         }
+    <div class="flex gap-3 justify-end">
+      <button
+        type="button"
+        (click)="onCancel()"
+        [disabled]="isSubmitting()"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm border border-line-default text-sm font-medium text-ink-secondary hover:bg-surface-2 hover:text-ink-primary transition disabled:opacity-50"
+      >
+        Cancelar
+      </button>
 
-         <div class="flex gap-4">
-            <button
-               type="button"
-               (click)="onCancel()"
-               [disabled]="isSubmitting()"
-               class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-               Cancelar
-            </button>
-
-            <button
-               type="submit"
-               [disabled]="!canSubmit()"
-               class="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-               @if (isSubmitting()) {
-                  <span class="flex items-center justify-center gap-2">
-                     <svg
-                        class="animate-spin h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                     >
-                        <circle
-                           class="opacity-25"
-                           cx="12"
-                           cy="12"
-                           r="10"
-                           stroke="currentColor"
-                           stroke-width="4"
-                        ></circle>
-                        <path
-                           class="opacity-75"
-                           fill="currentColor"
-                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                     </svg>
-                     Guardando...
-                  </span>
-               } @else {
-                  {{ submitButtonText() }}
-               }
-            </button>
-         </div>
-      </form>
-   </div>
+      <button
+        type="submit"
+        [disabled]="!canSubmit()"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold shadow-brand transition disabled:bg-surface-3 disabled:text-ink-tertiary disabled:shadow-none disabled:cursor-not-allowed"
+      >
+        @if (isSubmitting()) {
+          <span class="material-symbols-rounded text-[18px] animate-spin">progress_activity</span>
+          Guardando…
+        } @else {
+          <span class="material-symbols-rounded text-[18px]">check</span>
+          {{ submitButtonText() }}
+        }
+      </button>
+    </div>
+  </form>
 </div>

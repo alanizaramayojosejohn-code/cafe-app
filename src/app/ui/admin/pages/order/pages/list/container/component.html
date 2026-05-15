@@ -1,70 +1,111 @@
-<div class="min-h-screen bg-gray-50 p-4">
-  <div class="max-w-2xl mx-auto">
-    <!-- Filtros -->
-    <div class="mb-6 flex gap-2">
-      <button
-        (click)="setFilter('all')"
-        [class.bg-gray-900]="selectedStatus() === 'all'"
-        [class.text-white]="selectedStatus() === 'all'"
-        [class.bg-white]="selectedStatus() !== 'all'"
-        class="px-4 py-2 rounded-lg border border-gray-300 font-medium">
-        Todas
-      </button>
-      <button
-        (click)="setFilter('pendiente')"
-        [class.bg-gray-900]="selectedStatus() === 'pendiente'"
-        [class.text-white]="selectedStatus() === 'pendiente'"
-        [class.bg-white]="selectedStatus() !== 'pendiente'"
-        class="px-4 py-2 rounded-lg border border-gray-300 font-medium">
-        Pendientes
-      </button>
-      <button
-        (click)="setFilter('preparando')"
-        [class.bg-gray-900]="selectedStatus() === 'preparando'"
-        [class.text-white]="selectedStatus() === 'preparando'"
-        [class.bg-white]="selectedStatus() !== 'preparando'"
-        class="px-4 py-2 rounded-lg border border-gray-300 font-medium">
-        En preparación
-      </button>
-    </div>
+<div class="p-6 space-y-6">
+  <div>
+    <p class="font-display text-[10px] font-semibold tracking-[0.25em] text-brand-500">ÓRDENES</p>
+    <h1 class="font-display text-3xl font-bold text-ink-primary mt-1">Órdenes activas</h1>
+    <p class="text-sm text-ink-tertiary mt-1">Selecciona una orden para cobrarla.</p>
+  </div>
 
-    <!-- Lista de órdenes -->
-    <div class="space-y-3">
-      @for (order of filterOrders(orders$ | async); track order.id) {
-        <button
-          (click)="selectOrder(order.id)"
-          class="w-full bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all text-left">
-          <div class="flex justify-between items-start mb-3">
-            <h3 class="font-semibold text-lg">{{ order.tableName }}</h3>
-            <span class="text-sm text-gray-500">
+  <div class="flex gap-2 flex-wrap">
+    <button
+      type="button"
+      (click)="setFilter('all')"
+      class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+      [class.bg-brand-500]="selectedStatus() === 'all'"
+      [class.text-white]="selectedStatus() === 'all'"
+      [class.border-brand-500]="selectedStatus() === 'all'"
+      [class.shadow-brand]="selectedStatus() === 'all'"
+      [class.bg-surface-1]="selectedStatus() !== 'all'"
+      [class.text-ink-secondary]="selectedStatus() !== 'all'"
+      [class.border-line-subtle]="selectedStatus() !== 'all'"
+      [class.hover:bg-surface-2]="selectedStatus() !== 'all'"
+    >
+      Todas activas
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('pendiente')"
+      class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+      [class.bg-warning]="selectedStatus() === 'pendiente'"
+      [class.text-white]="selectedStatus() === 'pendiente'"
+      [class.border-warning]="selectedStatus() === 'pendiente'"
+      [class.bg-surface-1]="selectedStatus() !== 'pendiente'"
+      [class.text-ink-secondary]="selectedStatus() !== 'pendiente'"
+      [class.border-line-subtle]="selectedStatus() !== 'pendiente'"
+      [class.hover:bg-surface-2]="selectedStatus() !== 'pendiente'"
+    >
+      Pendientes
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('lista')"
+      class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+      [class.bg-success]="selectedStatus() === 'lista'"
+      [class.text-white]="selectedStatus() === 'lista'"
+      [class.border-success]="selectedStatus() === 'lista'"
+      [class.bg-surface-1]="selectedStatus() !== 'lista'"
+      [class.text-ink-secondary]="selectedStatus() !== 'lista'"
+      [class.border-line-subtle]="selectedStatus() !== 'lista'"
+      [class.hover:bg-surface-2]="selectedStatus() !== 'lista'"
+    >
+      Listas
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('preparando')"
+      class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+      [class.bg-ink-primary]="selectedStatus() === 'preparando'"
+      [class.text-white]="selectedStatus() === 'preparando'"
+      [class.border-ink-primary]="selectedStatus() === 'preparando'"
+      [class.bg-surface-1]="selectedStatus() !== 'preparando'"
+      [class.text-ink-secondary]="selectedStatus() !== 'preparando'"
+      [class.border-line-subtle]="selectedStatus() !== 'preparando'"
+      [class.hover:bg-surface-2]="selectedStatus() !== 'preparando'"
+    >
+      En preparación
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+    @for (order of filterOrders(orders$ | async); track order.id) {
+      <button
+        type="button"
+        (click)="selectOrder(order.id)"
+        class="group bg-surface-1 border border-line-subtle rounded-md p-4 hover:border-brand-500 hover:shadow-md transition text-left"
+      >
+        <div class="flex justify-between items-start mb-3 gap-2">
+          <div class="min-w-0">
+            <h3 class="font-display text-base font-bold text-ink-primary truncate">{{ order.tableName }}</h3>
+            <p class="text-[11px] text-ink-tertiary mt-0.5">
               {{ order.createdAt.toDate() | date: 'short' }}
-            </span>
+            </p>
           </div>
-
-          <p class="text-gray-600 text-sm mb-3">
-            {{ getOrderSummary(order) }}
-          </p>
-
-          <div class="flex justify-between items-center">
-            <span
-              [class.bg-yellow-100]="order.status === 'pendiente'"
-              [class.text-yellow-800]="order.status === 'pendiente'"
-              [class.bg-blue-100]="order.status === 'preparando'"
-              [class.text-blue-800]="order.status === 'preparando'"
-              class="px-3 py-1 rounded-full text-xs font-medium">
-              {{ order.status === 'pendiente' ? 'Pendiente' : 'Preparando' }}
-            </span>
-            <span class="font-bold text-lg">{{ order.total.toFixed(2) }} Bs</span>
-          </div>
-        </button>
-      } @empty {
-        <div class="text-center py-12">
-          <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <p class="text-gray-500">No hay órdenes</p>
+          <span
+            class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-white"
+            [class.bg-warning]="order.status === 'pendiente'"
+            [class.bg-success]="order.status === 'lista'"
+            [class.bg-ink-primary]="order.status === 'preparando'"
+          >
+            {{ statusLabel(order.status) }}
+          </span>
         </div>
-      }
-    </div>
+
+        <p class="text-sm text-ink-secondary line-clamp-2 mb-3">
+          {{ getOrderSummary(order) }}
+        </p>
+
+        <div class="flex justify-between items-center pt-3 border-t border-line-subtle">
+          <span class="text-[11px] text-ink-tertiary group-hover:text-brand-500 transition">Cobrar →</span>
+          <span class="font-display text-lg font-bold text-ink-primary font-mono">
+            {{ order.total | currency: 'BOB' : 'symbol-narrow' : '1.2-2' }}
+          </span>
+        </div>
+      </button>
+    } @empty {
+      <div class="col-span-full bg-surface-1 border border-line-subtle rounded-md p-12 text-center">
+        <span class="material-symbols-rounded text-[48px] text-ink-tertiary opacity-60">receipt_long</span>
+        <p class="font-display text-base font-semibold text-ink-primary mt-2">No hay órdenes</p>
+        <p class="text-sm text-ink-tertiary mt-1">Las órdenes activas aparecerán aquí.</p>
+      </div>
+    }
   </div>
 </div>
