@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router'
 import { OrderRoutes } from './pages/order/routes'
+import { SalesRoutes } from './pages/sales/routes'
+import { InventoryRoutes } from './pages/inventory/routes'
 
 export const AdminRoutes: Routes = [
    {
@@ -9,6 +11,11 @@ export const AdminRoutes: Routes = [
    {
       path: 'usuarios',
       loadComponent: async () => await import('./pages/users/container/component'),
+   },
+   {
+      path: 'usuarios/:uid/pagos',
+      loadComponent: async () =>
+         await import('./pages/users/pages/payments/payments.component'),
    },
    {
       path: 'home',
@@ -23,25 +30,25 @@ export const AdminRoutes: Routes = [
       loadComponent: async () => import('./pages/sales/components/seed-tables.component'),
    },
    {
-      path: 'sale',
-      loadComponent: async () => import('./pages/sales/container/component'),
+      path: 'ventas',
+      children: SalesRoutes,
    },
    {
-      path: 'usuarios',
-      loadComponent: async () => await import('./pages/users/container/component'),
+      path: 'inventario',
+      children: InventoryRoutes,
    },
-   //  {
-   //     path: 'orders',
-   //     loadComponent: async () => import('./pages/sales/pages/order/container/component'),
-   //  },
-   //  {
-   //     path: 'orders/:id/payment',
-   //     loadComponent: async () => import('./pages/sales/pages/payment/container/component'),
-   //  },
-
+   {
+      path: 'sale',
+      redirectTo: 'ventas',
+      pathMatch: 'full',
+   },
    {
       path: 'ordenes',
       loadComponent: async () => await import('./pages/order/container/component'),
       children: OrderRoutes,
+   },
+   {
+      path: 'reportes',
+      loadComponent: async () => await import('./pages/reports/container/component'),
    },
 ]

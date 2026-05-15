@@ -20,6 +20,10 @@ export interface Product {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   userId?: string;
+  /** Stock disponible. Solo aplica a productos no comestibles. undefined = sin trackear. */
+  stock?: number;
+  /** Costo de elaboración o adquisición por unidad (Bs). undefined = no registrado. Acepta decimales. */
+  cost?: number;
 }
 
 export interface ProductCreate extends Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'imageUrl' | 'imagePath' | 'recipeUrl' | 'recipePath'> {

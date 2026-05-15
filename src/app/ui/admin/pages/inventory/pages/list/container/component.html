@@ -1,0 +1,218 @@
+<div class="p-6 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+      <p class="font-display text-[10px] font-semibold tracking-[0.25em] text-brand-500">INVENTARIO</p>
+      <h1 class="font-display text-3xl font-bold text-ink-primary mt-1">Inventario</h1>
+      <p class="text-sm text-ink-tertiary mt-1">Stock de productos no comestibles.</p>
+    </div>
+    <button
+      type="button"
+      (click)="irNotas()"
+      class="relative inline-flex items-center justify-center gap-2 bg-surface-1 border border-line-subtle text-ink-secondary px-4 py-2 rounded-sm text-sm font-medium hover:bg-surface-2 hover:text-ink-primary transition"
+    >
+      <span class="material-symbols-rounded text-[18px]">sticky_note_2</span>
+      Notas de cocina/caja
+      @if (pendingNotesCount() > 0) {
+        <span
+          class="ml-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-mono font-bold rounded-full bg-brand-500 text-white shadow-brand"
+        >
+          {{ pendingNotesCount() }}
+        </span>
+      }
+    </button>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-4">
+      <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">NO COMESTIBLES</p>
+      <p class="font-display text-2xl font-bold text-ink-primary mt-1 font-mono">{{ counts().total }}</p>
+    </div>
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-4">
+      <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">TRACKEADOS</p>
+      <p class="font-display text-2xl font-bold text-ink-primary mt-1 font-mono">{{ counts().tracked }}</p>
+    </div>
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-4">
+      <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">STOCK BAJO</p>
+      <p class="font-display text-2xl font-bold text-warning mt-1 font-mono">{{ counts().low }}</p>
+    </div>
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-4">
+      <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">AGOTADOS</p>
+      <p class="font-display text-2xl font-bold text-danger mt-1 font-mono">{{ counts().out }}</p>
+    </div>
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-4">
+      <p class="font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">SIN TRACK</p>
+      <p class="font-display text-2xl font-bold text-ink-tertiary mt-1 font-mono">{{ counts().untracked }}</p>
+    </div>
+  </div>
+
+  <div class="flex gap-2 flex-wrap">
+    <button
+      type="button"
+      (click)="setFilter('all')"
+      class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+      [class.bg-brand-500]="filter() === 'all'"
+      [class.text-white]="filter() === 'all'"
+      [class.border-brand-500]="filter() === 'all'"
+      [class.shadow-brand]="filter() === 'all'"
+      [class.bg-surface-1]="filter() !== 'all'"
+      [class.text-ink-secondary]="filter() !== 'all'"
+      [class.border-line-subtle]="filter() !== 'all'"
+      [class.hover:bg-surface-2]="filter() !== 'all'"
+    >
+      Todos
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('tracked')"
+      class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+      [class.bg-success]="filter() === 'tracked'"
+      [class.text-white]="filter() === 'tracked'"
+      [class.border-success]="filter() === 'tracked'"
+      [class.bg-surface-1]="filter() !== 'tracked'"
+      [class.text-ink-secondary]="filter() !== 'tracked'"
+      [class.border-line-subtle]="filter() !== 'tracked'"
+      [class.hover:bg-surface-2]="filter() !== 'tracked'"
+    >
+      Trackeados
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('low')"
+      class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+      [class.bg-warning]="filter() === 'low'"
+      [class.text-white]="filter() === 'low'"
+      [class.border-warning]="filter() === 'low'"
+      [class.bg-surface-1]="filter() !== 'low'"
+      [class.text-ink-secondary]="filter() !== 'low'"
+      [class.border-line-subtle]="filter() !== 'low'"
+      [class.hover:bg-surface-2]="filter() !== 'low'"
+    >
+      Stock bajo
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('out')"
+      class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+      [class.bg-danger]="filter() === 'out'"
+      [class.text-white]="filter() === 'out'"
+      [class.border-danger]="filter() === 'out'"
+      [class.bg-surface-1]="filter() !== 'out'"
+      [class.text-ink-secondary]="filter() !== 'out'"
+      [class.border-line-subtle]="filter() !== 'out'"
+      [class.hover:bg-surface-2]="filter() !== 'out'"
+    >
+      Agotados
+    </button>
+    <button
+      type="button"
+      (click)="setFilter('untracked')"
+      class="px-4 py-2 rounded-sm border text-sm font-medium transition"
+      [class.bg-ink-primary]="filter() === 'untracked'"
+      [class.text-white]="filter() === 'untracked'"
+      [class.border-ink-primary]="filter() === 'untracked'"
+      [class.bg-surface-1]="filter() !== 'untracked'"
+      [class.text-ink-secondary]="filter() !== 'untracked'"
+      [class.border-line-subtle]="filter() !== 'untracked'"
+      [class.hover:bg-surface-2]="filter() !== 'untracked'"
+    >
+      Sin track
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="bg-surface-1 border border-line-subtle rounded-md p-12 text-center text-ink-tertiary">
+      Cargando…
+    </div>
+  } @else {
+    <div class="bg-surface-1 border border-line-subtle rounded-md overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-surface-2 border-b border-line-subtle text-left">
+          <tr>
+            <th class="px-4 py-3 font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">PRODUCTO</th>
+            <th class="px-4 py-3 font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">POKENAME</th>
+            <th class="px-4 py-3 font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary">STOCK</th>
+            <th class="px-4 py-3 font-display text-[10px] font-semibold tracking-[0.2em] text-ink-tertiary text-right">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line-subtle">
+          @for (product of filtered(); track product.id) {
+            <tr class="hover:bg-surface-2 transition-colors">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-10 h-10 bg-surface-2 rounded-sm overflow-hidden shrink-0 flex items-center justify-center">
+                    @if (product.imageUrl) {
+                      <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-full object-cover" />
+                    } @else {
+                      <span class="material-symbols-rounded text-ink-tertiary text-[18px]">image</span>
+                    }
+                  </div>
+                  <span class="font-medium text-ink-primary truncate">{{ product.name }}</span>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-ink-tertiary font-mono text-xs">{{ product.pokename }}</td>
+              <td class="px-4 py-3">
+                @if (editingId() === product.id) {
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    [value]="editingValue()"
+                    (input)="editingValue.set($any($event.target).value)"
+                    class="w-24 px-2 py-1.5 bg-surface-1 border border-line-default rounded-sm text-sm text-ink-primary font-mono focus:border-brand-500 focus:ring-2 focus:ring-brand-glow focus:outline-none transition"
+                  />
+                } @else if (product.stock === undefined || product.stock === null) {
+                  <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface-2 text-ink-tertiary">Sin track</span>
+                } @else if (product.stock === 0) {
+                  <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-danger text-white">Agotado</span>
+                } @else if (product.stock < 5) {
+                  <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-warning text-white">{{ product.stock }}</span>
+                } @else {
+                  <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-success text-white">{{ product.stock }}</span>
+                }
+              </td>
+              <td class="px-4 py-3 text-right">
+                @if (editingId() === product.id) {
+                  <div class="inline-flex gap-2">
+                    <button
+                      type="button"
+                      (click)="saveEdit(product)"
+                      [disabled]="saving()"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-xs font-semibold bg-brand-500 text-white hover:bg-brand-600 shadow-brand transition disabled:opacity-50"
+                    >
+                      <span class="material-symbols-rounded text-[14px]">check</span>
+                      {{ saving() ? 'Guardando…' : 'Guardar' }}
+                    </button>
+                    <button
+                      type="button"
+                      (click)="cancelEdit()"
+                      [disabled]="saving()"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-xs font-medium border border-line-default text-ink-secondary hover:bg-surface-2 transition disabled:opacity-50"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="startEdit(product)"
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-xs font-medium border border-line-default text-ink-secondary hover:bg-surface-2 hover:text-ink-primary transition"
+                  >
+                    <span class="material-symbols-rounded text-[14px]">edit</span>
+                    Editar stock
+                  </button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="px-4 py-12 text-center">
+                <span class="material-symbols-rounded text-[40px] text-ink-tertiary opacity-60">inventory_2</span>
+                <p class="font-display text-sm font-semibold text-ink-primary mt-2">No hay productos para este filtro</p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

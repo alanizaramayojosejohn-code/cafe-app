@@ -1,22 +1,24 @@
-import { Component } from '@angular/core'
+import { Component, input, output } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterLink, RouterLinkActive } from '@angular/router'
-import { MatButtonModule } from '@angular/material/button'
-import { MatIconModule } from '@angular/material/icon'
-import { MatMenuModule } from '@angular/material/menu'
+
 @Component({
    selector: 'app-navbar-options',
    standalone: true,
-   imports: [CommonModule, RouterLink, RouterLinkActive, MatButtonModule, MatIconModule, MatMenuModule],
+   imports: [CommonModule, RouterLink, RouterLinkActive],
    templateUrl: './navbar-options.html',
-   styleUrls: ['./navbar-options.css'],
 })
 export class NavbarOptionsComponent {
+   collapsed = input<boolean>(false)
+   navigate = output<void>()
+
    menuItems = [
-      { label: 'Inicio', icon: 'home', route: '/admin/home' },
-      { label: 'Productos', icon: 'shopping_cart', route: '/admin/productos' },
-      { label: 'Perfil', icon: 'person', route: '/profile' },
-      { label: 'Venta', icon: 'shopping_cart', route: '/admin/sale' },
-      { label: 'Ordenes', icon: 'dollar', route: '/profile/ordenes' },
+      { label: 'Tablero', icon: 'restaurant_menu', route: '/cocina', exact: true },
+      { label: 'Historial', icon: 'history', route: '/cocina/historial', exact: false },
+      { label: 'Notas', icon: 'sticky_note_2', route: '/cocina/notas', exact: false },
    ]
+
+   onClick() {
+      this.navigate.emit()
+   }
 }

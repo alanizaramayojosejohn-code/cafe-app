@@ -1,10 +1,13 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core'
-import { AsyncPipe } from '@angular/common'
+import { AsyncPipe, CurrencyPipe } from '@angular/common'
 import { FormsModule } from '@angular/forms'
+import { ActivatedRoute, Router } from '@angular/router'
+import { firstValueFrom } from 'rxjs'
 import { ProductService } from '../../../../../services/product/product.service'
 import { CategoryService } from '../../../../../services/category/category.service'
 import { TableService } from '../../../../../services/order/table.service'
 import { OrderService } from '../../../../../services/order/order.service'
+import { AuthService } from '../../../../../services/auth/auth.service'
 import { Product } from '../../../../../models/product.model'
 import { Category } from '../../../../../models/category.model'
 import { Table } from '../../../../../models/table.model'
@@ -17,7 +20,7 @@ import { ProductRepositoryService } from '../../../../../services/product/produc
 
 @Component({
    selector: 'app-sales',
-   imports: [AsyncPipe, FormsModule],
+   imports: [FormsModule, CurrencyPipe],
    providers: [
       ProductService,
       TableService,
@@ -36,6 +39,9 @@ export default class SalesComponent implements OnInit {
    private categoryService = inject(CategoryService)
    private tableService = inject(TableService)
    private orderService = inject(OrderService)
+   private authService = inject(AuthService)
+   private route = inject(ActivatedRoute)
+   private router = inject(Router)
 
    products$!: Observable<Product[]>
    categories$!: Observable<Category[]>
@@ -50,6 +56,11 @@ export default class SalesComponent implements OnInit {
    allCategories = signal<Category[]>([])
    allTables = signal<Table[]>([])
    saving = signal(false)
+   editingId = signal<string | null>(null)
+   loadingOrder = signal(false)
+   private originalItems: OrderItem[] = []
+
+   isEditing = computed(() => this.editingId() !== null)
 
    filteredProducts = computed(() => {
       const query = this.searchQuery().toLowerCase()
@@ -101,12 +112,19 @@ export default class SalesComponent implements OnInit {
       return this.subtotal()
    })
 
+   selectedTableLabel = computed(() => {
+      const id = this.selectedTableId()
+      if (!id) return ''
+      const t = this.allTables().find((x) => x.id === id)
+      if (!t) return ''
+      return t.location ? `${t.name} · ${t.location}` : t.name
+   })
+
    ngOnInit() {
       this.products$ = this.productService.getProducts()
       this.categories$ = this.categoryService.getCategories()
       this.tables$ = this.tableService.getTables()
 
-      // Suscribirse para actualizar signals
       this.products$.subscribe((products) => {
          this.allProducts.set(products)
       })
@@ -118,6 +136,43 @@ export default class SalesComponent implements OnInit {
       this.tables$.subscribe((tables) => {
          this.allTables.set(tables)
       })
+
+      const id = this.route.snapshot.paramMap.get('id')
+      if (id) {
+         this.editingId.set(id)
+         this.loadOrderForEdit(id)
+      }
+   }
+
+   private async loadOrderForEdit(id: string) {
+      this.loadingOrder.set(true)
+      try {
+         const order = await firstValueFrom(this.orderService.getOrderById(id))
+         if (!order) {
+            alert('No se encontró la venta')
+            this.goBackToList()
+            return
+         }
+         if (order.status === 'cancelado') {
+            alert('Esta venta está cancelada y no se puede editar')
+            this.goBackToList()
+            return
+         }
+         if (order.status === 'entregado') {
+            alert('Esta venta ya fue entregada y no se puede editar')
+            this.goBackToList()
+            return
+         }
+         this.selectedTableId.set(order.tableId)
+         this.originalItems = order.items.map((i) => ({ ...i }))
+         this.orderItems.set(order.items.map((i) => ({ ...i })))
+      } catch (error) {
+         console.error('Error al cargar la venta:', error)
+         alert('Error al cargar la venta')
+         this.goBackToList()
+      } finally {
+         this.loadingOrder.set(false)
+      }
    }
 
    selectTab(tab: 'Comida' | 'Objetos') {
@@ -136,11 +191,17 @@ export default class SalesComponent implements OnInit {
    addProduct(product: Product) {
       const items = this.orderItems()
       const existingItem = items.find((item) => item.productId === product.id)
+      const nextQty = (existingItem?.quantity ?? 0) + 1
+
+      if (!this.canSellQuantity(product, nextQty)) {
+         alert(`Stock insuficiente de "${product.name}". Disponible: ${this.availableStock(product) ?? 0}.`)
+         return
+      }
 
       if (existingItem) {
          const updatedItems = items.map((item) =>
             item.productId === product.id
-               ? { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * item.price }
+               ? { ...item, quantity: nextQty, subtotal: nextQty * item.price }
                : item
          )
          this.orderItems.set(updatedItems)
@@ -156,6 +217,25 @@ export default class SalesComponent implements OnInit {
       }
    }
 
+   /**
+    * Stock disponible para vender = stock guardado del producto
+    * + cantidad que ya estaba en la orden original (en modo edición, esa cantidad
+    * ya fue descontada al crear la orden, así que está "reservada" para nosotros).
+    */
+   availableStock(product: Product): number | null {
+      if (product.type !== 'nocomestible') return null
+      if (product.stock === undefined || product.stock === null) return null
+      const reservedByOriginal =
+         this.originalItems.find((i) => i.productId === product.id)?.quantity ?? 0
+      return product.stock + reservedByOriginal
+   }
+
+   private canSellQuantity(product: Product, qty: number): boolean {
+      const available = this.availableStock(product)
+      if (available === null) return true
+      return qty <= available
+   }
+
    removeProduct(productId: string) {
       const items = this.orderItems().filter((item) => item.productId !== productId)
       this.orderItems.set(items)
@@ -167,10 +247,22 @@ export default class SalesComponent implements OnInit {
          return
       }
 
-      const items = this.orderItems().map((item) =>
-         item.productId === productId ? { ...item, quantity, subtotal: quantity * item.price } : item
+      const items = this.orderItems()
+      const target = items.find((i) => i.productId === productId)
+      if (target && !this.canSellQuantity(target.product, quantity)) {
+         alert(
+            `Stock insuficiente de "${target.product.name}". Disponible: ${
+               this.availableStock(target.product) ?? 0
+            }.`
+         )
+         return
+      }
+
+      this.orderItems.set(
+         items.map((item) =>
+            item.productId === productId ? { ...item, quantity, subtotal: quantity * item.price } : item
+         )
       )
-      this.orderItems.set(items)
    }
 
    async saveOrder() {
@@ -192,21 +284,38 @@ export default class SalesComponent implements OnInit {
          const selectedTable = tables.find((t) => t.id === tableId)
          const tableName = selectedTable ? selectedTable.name : 'Mesa'
 
-         await this.orderService.createOrder({
-            tableId,
-            tableName,
-            items,
-            subtotal: this.subtotal(),
-            total: this.total(),
-            status: 'pendiente',
-         })
+         const editingId = this.editingId()
+         if (editingId) {
+            await this.orderService.updateOrderItems(editingId, this.originalItems, {
+               tableId,
+               tableName,
+               items,
+               subtotal: this.subtotal(),
+               total: this.total(),
+            })
+            alert('Venta actualizada exitosamente')
+            this.goBackToList()
+         } else {
+            const uid = this.authService.getCurrentUser()?.uid
+            await this.orderService.createOrder({
+               tableId,
+               tableName,
+               items,
+               subtotal: this.subtotal(),
+               total: this.total(),
+               status: 'pendiente',
+               ...(uid ? { userId: uid } : {}),
+            })
 
-         this.orderItems.set([])
-         this.selectedTableId.set('')
-         alert('Orden guardada exitosamente')
+            this.orderItems.set([])
+            this.selectedTableId.set('')
+            alert('Venta guardada exitosamente')
+            this.goBackToList()
+         }
       } catch (error) {
-         console.error('Error al guardar la orden:', error)
-         alert('Error al guardar la orden')
+         console.error('Error al guardar la venta:', error)
+         const msg = error instanceof Error ? error.message : 'Error al guardar la venta'
+         alert(msg)
       } finally {
          this.saving.set(false)
       }
@@ -215,6 +324,15 @@ export default class SalesComponent implements OnInit {
    clearOrder() {
       if (confirm('¿Estás seguro de limpiar la orden?')) {
          this.orderItems.set([])
+      }
+   }
+
+   goBackToList() {
+      const id = this.editingId()
+      if (id) {
+         this.router.navigate(['../..'], { relativeTo: this.route })
+      } else {
+         this.router.navigate(['..'], { relativeTo: this.route })
       }
    }
 }

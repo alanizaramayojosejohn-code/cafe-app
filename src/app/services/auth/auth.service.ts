@@ -1,18 +1,23 @@
 import { Injectable, signal, inject } from '@angular/core'
 import {
    Auth,
-   createUserWithEmailAndPassword,
    signInWithEmailAndPassword,
    signInWithPopup,
    GoogleAuthProvider,
    signOut,
    authState,
+   deleteUser,
+   sendPasswordResetEmail,
    User as FirebaseUser,
 } from '@angular/fire/auth'
-import { Observable } from 'rxjs'
+import { Observable, ReplaySubject } from 'rxjs'
 import { Router } from '@angular/router'
 import { UserService } from './../user/user.service'
 import { AppUser, UserRole } from '../../models/user.model'
+
+const UNAUTHORIZED_MESSAGE =
+   'No estás autorizado. Pide al administrador que te registre antes de iniciar sesión.'
+const DEACTIVATED_MESSAGE = 'Cuenta desactivada. Contacta al administrador.'
 
 @Injectable({
    providedIn: 'root',
@@ -27,6 +32,9 @@ export class AuthService {
    userData = signal<AppUser | null>(null)
    currentRole = signal<UserRole | null>(null)
 
+   private userDataReady = new ReplaySubject<AppUser | null>(1)
+   authReady$: Observable<AppUser | null> = this.userDataReady.asObservable()
+
    constructor() {
       this.user$ = authState(this.auth)
 
@@ -38,44 +46,70 @@ export class AuthService {
          } else {
             this.userData.set(null)
             this.currentRole.set(null)
+            this.userDataReady.next(null)
          }
       })
    }
 
-   private async loadUserData(uid: string) {
+   private async loadUserData(uid: string): Promise<AppUser | null> {
       try {
          const user = await this.userService.getUserByUid(uid)
-         if (user) {
-            this.userData.set(user)
-            this.currentRole.set(user.role)
-         }
+         this.userData.set(user)
+         this.currentRole.set(user?.role ?? null)
+         this.userDataReady.next(user)
+         return user
       } catch (error) {
          console.error('Error loading user data:', error)
+         this.userDataReady.next(null)
+         return null
       }
    }
 
-   async registerWithEmail(email: string, password: string, displayName: string = 'Usuario') {
-      try {
-         const credential = await createUserWithEmailAndPassword(this.auth, email, password)
+   private async provisionAndLoad(credentialUser: FirebaseUser, fallbackName: string): Promise<AppUser> {
+      const provisioned = await this.userService.provisionUser(
+         credentialUser.uid,
+         credentialUser.email!,
+         credentialUser.displayName || fallbackName
+      )
 
-         await this.userService.createOrUpdateUser(credential.user.uid, {
-            email: credential.user.email!,
-            displayName,
-            role: 'cajero',
-            isActive: true
-         })
-
-         await this.loadUserData(credential.user.uid)
-         return credential
-      } catch (error: any) {
-         throw this.handleError(error)
+      if (!provisioned) {
+         await this.rejectUnauthorized(credentialUser)
+         throw UNAUTHORIZED_MESSAGE
       }
+
+      if (!provisioned.isActive) {
+         await this.rejectUnauthorized(credentialUser, false)
+         throw DEACTIVATED_MESSAGE
+      }
+
+      this.userData.set(provisioned)
+      this.currentRole.set(provisioned.role)
+      this.userDataReady.next(provisioned)
+      return provisioned
+   }
+
+   private async rejectUnauthorized(user: FirebaseUser, removeAuthAccount = true) {
+      if (removeAuthAccount) {
+         try {
+            await deleteUser(user)
+         } catch {
+            /* fallback to signOut if delete fails */
+         }
+      }
+      try {
+         await signOut(this.auth)
+      } catch {
+         /* ignore */
+      }
+      this.userData.set(null)
+      this.currentRole.set(null)
+      this.userDataReady.next(null)
    }
 
    async loginWithEmail(email: string, password: string) {
       try {
          const credential = await signInWithEmailAndPassword(this.auth, email, password)
-         await this.loadUserData(credential.user.uid)
+         await this.provisionAndLoad(credential.user, 'Usuario')
          return credential
       } catch (error: any) {
          throw this.handleError(error)
@@ -89,16 +123,16 @@ export class AuthService {
             prompt: 'select_account',
          })
          const credential = await signInWithPopup(this.auth, provider)
-
-         await this.userService.createOrUpdateUser(credential.user.uid, {
-            email: credential.user.email!,
-            displayName: credential.user.displayName || 'Usuario',
-            role: 'cajero',
-            isActive: true
-         })
-
-         await this.loadUserData(credential.user.uid)
+         await this.provisionAndLoad(credential.user, 'Usuario')
          return credential
+      } catch (error: any) {
+         throw this.handleError(error)
+      }
+   }
+
+   async sendPasswordReset(email: string) {
+      try {
+         await sendPasswordResetEmail(this.auth, email)
       } catch (error: any) {
          throw this.handleError(error)
       }
@@ -136,7 +170,28 @@ export class AuthService {
       return currentRole ? roles.includes(currentRole) : false
    }
 
+   getHomeByRole(role: UserRole | null | undefined): string {
+      switch (role) {
+         case 'admin':
+            return '/admin'
+         case 'cajero':
+            return '/caja'
+         case 'cocinero':
+            return '/cocina'
+         default:
+            return '/log-in'
+      }
+   }
+
+   async redirectByRole(fallback?: string): Promise<boolean> {
+      const role = this.currentRole()
+      const target = role ? this.getHomeByRole(role) : (fallback ?? '/log-in')
+      return this.router.navigateByUrl(target)
+   }
+
    private handleError(error: any): string {
+      if (typeof error === 'string') return error
+
       let errorMessage = 'Ocurrió un error'
 
       switch (error.code) {
@@ -165,7 +220,7 @@ export class AuthService {
             errorMessage = 'Solo se puede abrir una ventana a la vez'
             break
          default:
-            errorMessage = error.message
+            errorMessage = error.message ?? errorMessage
       }
 
       return errorMessage

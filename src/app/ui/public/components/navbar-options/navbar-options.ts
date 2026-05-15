@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 @Component({
   selector: 'app-navbar-options',
@@ -12,7 +11,6 @@ import { MatMenuModule } from '@angular/material/menu';
     RouterLink,
     RouterLinkActive,
     MatButtonModule,
-    MatIconModule,
     MatMenuModule,
   ],
   templateUrl: './navbar-options.html',

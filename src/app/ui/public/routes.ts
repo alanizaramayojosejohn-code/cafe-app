@@ -3,11 +3,7 @@ import { Routes } from '@angular/router'
 export const PublicRoutes: Routes = [
    {
       path: '',
-      loadComponent: async () => await import('./pages/sign-up/sign-up.component'),
-   },
-   {
-      path: 'sign-up',
-      loadComponent: async () => await import('./pages/sign-up/sign-up.component'),
+      loadComponent: async () => await import('./pages/log-in/log-in.component'),
    },
    {
       path: 'log-in',

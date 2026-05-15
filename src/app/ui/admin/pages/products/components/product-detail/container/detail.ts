@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, input, output } from '@angular/core'
-import { AsyncPipe } from '@angular/common'
+import { AsyncPipe, CurrencyPipe } from '@angular/common'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ProductService } from '../../../../../../../services/product/product.service'
 import { CategoryService } from '../../../../../../../services/category/category.service'
@@ -12,7 +12,7 @@ import { StorageService } from '../../../../../../../services/storage/storage.se
 
 @Component({
    selector: 'app-product-detail',
-   imports: [AsyncPipe],
+   imports: [AsyncPipe, CurrencyPipe],
    providers: [ProductService, CategoryService, FileValidationService, ImageCompressionService, StorageService],
    templateUrl: './detail.html',
    styleUrl: './detail.css',

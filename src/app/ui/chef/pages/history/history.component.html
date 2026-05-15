@@ -1,0 +1,74 @@
+<div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <p class="font-display text-[11px] font-semibold tracking-[0.25em] text-brand-500">
+        COCINA · HOY
+      </p>
+      <h1 class="font-display text-3xl lg:text-4xl font-bold text-ink-primary leading-tight">
+        Historial
+      </h1>
+    </div>
+    <div
+      class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-1 border border-line text-ink-secondary"
+    >
+      <span class="material-symbols-rounded text-[18px]">receipt_long</span>
+      <span class="text-sm font-bold">{{ orders().length }} órdenes</span>
+    </div>
+  </header>
+
+  @if (orders().length === 0) {
+    <div class="rounded-lg bg-surface-1 border border-line p-16 text-center space-y-3">
+      <span class="material-symbols-rounded text-[56px] text-ink-disabled">history</span>
+      <p class="font-display text-xl font-semibold text-ink-primary">Sin órdenes procesadas</p>
+      <p class="text-sm text-ink-tertiary">Las órdenes marcadas como listas aparecerán aquí.</p>
+    </div>
+  } @else {
+    <ul class="space-y-3">
+      @for (order of orders(); track order.id) {
+        <li class="rounded-lg bg-surface-1 border border-line px-5 py-4 flex flex-col sm:flex-row sm:items-start gap-4">
+          <!-- Mesa + hora -->
+          <div class="shrink-0 flex items-center gap-4">
+            <div>
+              <p class="font-display text-[9px] font-semibold tracking-[0.2em] text-ink-tertiary">MESA</p>
+              <p class="font-display text-4xl font-bold text-ink-primary leading-none">{{ order.tableName }}</p>
+            </div>
+            <div class="h-12 w-px bg-line-subtle"></div>
+            <div>
+              @if (order.createdAt) {
+                <p class="font-mono text-xl font-bold text-ink-primary">
+                  {{ order.createdAt.toDate() | date: 'HH:mm' }}
+                </p>
+              }
+              <p class="font-mono text-[11px] text-ink-tertiary">#{{ order.id.slice(-6).toUpperCase() }}</p>
+            </div>
+          </div>
+
+          <!-- Items -->
+          <ul class="flex-1 flex flex-wrap gap-2">
+            @for (item of order.items; track item.productId) {
+              <li class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-2 text-sm text-ink-primary">
+                <span class="font-mono font-bold text-brand-500">×{{ item.quantity }}</span>
+                <span>{{ item.product.name }}</span>
+              </li>
+            }
+          </ul>
+
+          <!-- Status chip -->
+          <div class="shrink-0">
+            @if (order.status === 'entregado') {
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-xs font-semibold">
+                <span class="material-symbols-rounded text-[14px]">check_circle</span>
+                Entregado
+              </span>
+            } @else {
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 text-brand-500 text-xs font-semibold">
+                <span class="material-symbols-rounded text-[14px]">done_all</span>
+                Lista
+              </span>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
